@@ -3,11 +3,31 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timedelta
 from ..core.database import get_db
-from ..core.permissions import require_admin, require_owner, require_role
+from ..core.permissions import require_admin, require_owner
 from ..models import User, UserRole, Comment, Content
 from ..schemas import UserResponse, CommentResponse, ContentResponse
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
+
+
+# ===== Helper =====
+def is_owner(user: User) -> bool:
+    return user.role == UserRole.OWNER
+
+
+def is_admin(user: User) -> bool:
+    return user.role == UserRole.ADMIN
+
+
+def is_superior(user: User, target: User) -> bool:
+    """Check if user can manage target"""
+    if user.role == UserRole.OWNER:
+        # Owner می‌تونه همه رو مدیریت کنه به جز خودش
+        return user.id != target.id
+    elif user.role == UserRole.ADMIN:
+        # Admin فقط کاربر عادی رو می‌تونه مدیریت کنه
+        return target.role == UserRole.USER
+    return False
 
 
 # ===== User Management =====
@@ -17,9 +37,8 @@ async def get_all_users(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
     search: Optional[str] = None,
-    role: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin)  # ← چک ادمین
+    current_user: User = Depends(require_admin)
 ):
     """Get all users (admin only)"""
     query = db.query(User)
@@ -30,9 +49,6 @@ async def get_all_users(
             (User.username.ilike(search_term)) | (User.email.ilike(search_term))
         )
     
-    if role:
-        query = query.filter(User.role == UserRole(role))
-    
     return query.offset(skip).limit(limit).all()
 
 
@@ -41,9 +57,16 @@ async def change_user_role(
     user_id: int,
     new_role: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_owner)  # ← فقط owner
+    current_user: User = Depends(require_owner)
 ):
     """Change user role (owner only)"""
+    # فقط Owner می‌تونه نقش عوض کنه
+    if current_user.role != UserRole.OWNER:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only owner can change roles"
+        )
+    
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -51,17 +74,17 @@ async def change_user_role(
             detail="User not found"
         )
     
-    if new_role not in ["owner", "admin", "user"]:
+    # Owner نمی‌تونه نقش خودش رو عوض کنه
+    if user.id == current_user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid role"
+            detail="You cannot change your own role"
         )
     
-    # جلوگیری از تغییر نقش خود owner
-    if user.id == current_user.id and new_role != "owner":
+    if new_role not in ["admin", "user"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You cannot change your own owner role"
+            detail="Invalid role. Only admin or user allowed."
         )
     
     user.role = UserRole(new_role)
@@ -76,9 +99,9 @@ async def ban_user(
     user_id: int,
     duration_hours: int = 24,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin)  # ← ادمین یا owner
+    current_user: User = Depends(require_admin)
 ):
-    """Ban a user for specified hours"""
+    """Ban a user"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -86,11 +109,11 @@ async def ban_user(
             detail="User not found"
         )
     
-    # جلوگیری از بن کردن خودش
-    if user.id == current_user.id:
+    # چک کن می‌تونه این کاربر رو بن کنه
+    if not is_superior(current_user, user):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You cannot ban yourself"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot ban this user"
         )
     
     user.is_banned = True
@@ -114,6 +137,12 @@ async def unban_user(
             detail="User not found"
         )
     
+    if not is_superior(current_user, user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot unban this user"
+        )
+    
     user.is_banned = False
     user.ban_until = None
     db.commit()
@@ -128,7 +157,7 @@ async def mute_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin)
 ):
-    """Mute a user for specified hours"""
+    """Mute a user"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -136,14 +165,15 @@ async def mute_user(
             detail="User not found"
         )
     
-    if user.id == current_user.id:
+    if not is_superior(current_user, user):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You cannot mute yourself"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot mute this user"
         )
     
     user.mute_until = datetime.utcnow() + timedelta(hours=duration_hours)
     db.commit()
+    db.refresh(user)
     
     return {"message": f"User muted for {duration_hours} hours"}
 
@@ -162,8 +192,15 @@ async def unmute_user(
             detail="User not found"
         )
     
+    if not is_superior(current_user, user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot unmute this user"
+        )
+    
     user.mute_until = None
     db.commit()
+    db.refresh(user)
     
     return {"message": "User unmuted"}
 
@@ -174,16 +211,11 @@ async def unmute_user(
 async def get_all_comments(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
-    is_approved: Optional[bool] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin)
 ):
     """Get all comments (admin only)"""
     query = db.query(Comment)
-    
-    if is_approved is not None:
-        query = query.filter(Comment.is_approved == is_approved)
-    
     return query.order_by(Comment.created_at.desc()).offset(skip).limit(limit).all()
 
 
@@ -196,15 +228,11 @@ async def approve_comment(
     """Approve a comment"""
     comment = db.query(Comment).filter(Comment.id == comment_id).first()
     if not comment:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Comment not found"
-        )
+        raise HTTPException(status_code=404, detail="Comment not found")
     
     comment.is_approved = True
     comment.is_hidden = False
     db.commit()
-    
     return {"message": "Comment approved"}
 
 
@@ -217,14 +245,10 @@ async def hide_comment(
     """Hide a comment"""
     comment = db.query(Comment).filter(Comment.id == comment_id).first()
     if not comment:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Comment not found"
-        )
+        raise HTTPException(status_code=404, detail="Comment not found")
     
     comment.is_hidden = True
     db.commit()
-    
     return {"message": "Comment hidden"}
 
 
@@ -237,10 +261,7 @@ async def delete_comment(
     """Delete a comment"""
     comment = db.query(Comment).filter(Comment.id == comment_id).first()
     if not comment:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Comment not found"
-        )
+        raise HTTPException(status_code=404, detail="Comment not found")
     
     db.delete(comment)
     db.commit()
@@ -253,14 +274,9 @@ async def delete_comment(
 async def get_all_content_admin(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
-    status_filter: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin)
 ):
-    """Get all content with status filter (admin only)"""
+    """Get all content (admin only)"""
     query = db.query(Content)
-    
-    if status_filter:
-        query = query.filter(Content.status == status_filter)
-    
     return query.order_by(Content.created_at.desc()).offset(skip).limit(limit).all()

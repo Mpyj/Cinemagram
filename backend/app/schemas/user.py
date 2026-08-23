@@ -28,6 +28,8 @@ class UserResponse(BaseModel):
     bio: Optional[str] = None
     is_active: bool
     is_banned: bool
+    ban_until: Optional[datetime] = None
+    mute_until: Optional[datetime] = None
     created_at: datetime
     
     class Config:
@@ -41,6 +43,8 @@ class UserProfileResponse(BaseModel):
     role: str
     avatar_url: Optional[str] = None
     bio: Optional[str] = None
+    ban_until: Optional[datetime] = None
+    mute_until: Optional[datetime] = None
     created_at: datetime
     
     class Config:

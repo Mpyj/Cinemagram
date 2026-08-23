@@ -26,7 +26,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
       localStorage.removeItem('access_token');
       localStorage.removeItem('user');
       if (typeof window !== 'undefined') {
@@ -90,6 +89,11 @@ export const register = async (data: RegisterRequest) => {
 export const getMyProfile = async () => {
   const response = await api.get('/users/me');
   return response.data as User;
+};
+
+export const getMyComments = async () => {
+  const response = await api.get('/users/me/comments');
+  return response.data as Comment[];
 };
 
 export const uploadAvatar = async (file: File) => {

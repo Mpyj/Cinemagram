@@ -105,7 +105,7 @@ export default function ContentDetailPage() {
     return (
       <>
         <Navbar />
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '1.2rem' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
           در حال بارگذاری...
         </div>
         <Footer />
@@ -117,7 +117,7 @@ export default function ContentDetailPage() {
     return (
       <>
         <Navbar />
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', fontSize: '1.2rem' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
           {error || 'محتوا یافت نشد'}
         </div>
         <Footer />
@@ -132,7 +132,6 @@ export default function ContentDetailPage() {
         <div className="detail-container">
           <div className="hero-bg"></div>
 
-          {/* بنر */}
           <div
             className="detail-banner"
             style={{ background: getGradient(content.type) }}
@@ -140,7 +139,6 @@ export default function ContentDetailPage() {
             {getEmoji(content.type)}
           </div>
 
-          {/* کارت اطلاعات */}
           <div className="detail-card">
             <h1 className="detail-title">{content.title}</h1>
 
@@ -169,11 +167,7 @@ export default function ContentDetailPage() {
             </p>
 
             <div className="detail-actions">
-              <button
-                className="btn-primary"
-                onClick={handleWatch}
-                style={{ padding: '10px 24px', fontSize: '0.85rem' }}
-              >
+              <button className="btn-primary" onClick={handleWatch} style={{ padding: '10px 24px', fontSize: '0.85rem' }}>
                 ▶ تماشا
               </button>
               <button
@@ -190,7 +184,6 @@ export default function ContentDetailPage() {
               </button>
             </div>
 
-            {/* بخش کامنت‌ها */}
             <div className="comments-section">
               <h2 className="comments-title">💬 نظرات ({comments.length})</h2>
 
@@ -212,12 +205,7 @@ export default function ContentDetailPage() {
                   className="btn-primary"
                   onClick={handleAddComment}
                   disabled={!newComment.trim() || !isLoggedIn}
-                  style={{
-                    marginTop: '10px',
-                    padding: '10px 24px',
-                    fontSize: '0.85rem',
-                    opacity: (!newComment.trim() || !isLoggedIn) ? 0.5 : 1,
-                  }}
+                  style={{ marginTop: '10px', padding: '10px 24px', fontSize: '0.85rem', opacity: (!newComment.trim() || !isLoggedIn) ? 0.5 : 1 }}
                 >
                   {isLoggedIn ? 'ثبت نظر' : 'ورود و ثبت نظر'}
                 </button>
@@ -234,7 +222,9 @@ export default function ContentDetailPage() {
                     <div className="comment-header">
                       <div className="comment-avatar">👤</div>
                       <div>
-                        <div className="comment-user">کاربر {comment.user_id}</div>
+                        <div className="comment-user">
+                          {comment.username || `کاربر ${comment.user_id}`}
+                        </div>
                         <div className="comment-date">
                           {new Date(comment.created_at).toLocaleDateString('fa-IR')}
                         </div>

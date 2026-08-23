@@ -16,10 +16,9 @@ app = FastAPI(
     redoc_url="/redoc" if settings.DEBUG else None,
 )
 
-# CORS - بازتر
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # همه آدرس‌ها
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

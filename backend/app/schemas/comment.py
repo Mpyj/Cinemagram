@@ -27,6 +27,7 @@ class CommentResponse(BaseModel):
     is_approved: bool
     is_hidden: bool
     created_at: datetime
+    username: Optional[str] = None  # ← نام کاربری
     replies: Optional[List["CommentResponse"]] = None
     
     class Config:
