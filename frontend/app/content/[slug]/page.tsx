@@ -105,7 +105,7 @@ export default function ContentDetailPage() {
     return (
       <>
         <Navbar />
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '1.2rem' }}>
           در حال بارگذاری...
         </div>
         <Footer />
@@ -117,7 +117,7 @@ export default function ContentDetailPage() {
     return (
       <>
         <Navbar />
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', fontSize: '1.2rem' }}>
           {error || 'محتوا یافت نشد'}
         </div>
         <Footer />
@@ -169,7 +169,11 @@ export default function ContentDetailPage() {
             </p>
 
             <div className="detail-actions">
-              <button className="btn-primary" onClick={handleWatch} style={{ padding: '10px 24px', fontSize: '0.85rem' }}>
+              <button
+                className="btn-primary"
+                onClick={handleWatch}
+                style={{ padding: '10px 24px', fontSize: '0.85rem' }}
+              >
                 ▶ تماشا
               </button>
               <button
@@ -208,7 +212,12 @@ export default function ContentDetailPage() {
                   className="btn-primary"
                   onClick={handleAddComment}
                   disabled={!newComment.trim() || !isLoggedIn}
-                  style={{ marginTop: '10px', padding: '10px 24px', fontSize: '0.85rem', opacity: (!newComment.trim() || !isLoggedIn) ? 0.5 : 1 }}
+                  style={{
+                    marginTop: '10px',
+                    padding: '10px 24px',
+                    fontSize: '0.85rem',
+                    opacity: (!newComment.trim() || !isLoggedIn) ? 0.5 : 1,
+                  }}
                 >
                   {isLoggedIn ? 'ثبت نظر' : 'ورود و ثبت نظر'}
                 </button>

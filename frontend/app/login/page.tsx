@@ -19,6 +19,22 @@ export default function LoginPage() {
     try {
       const response = await login({ email, password });
       localStorage.setItem('access_token', response.access_token);
+      
+      // بعد از ورود، پروفایل کاربر رو هم بگیر
+      try {
+        const userResponse = await fetch('http://localhost:8000/api/v1/users/me', {
+          headers: {
+            'Authorization': `Bearer ${response.access_token}`,
+          },
+        });
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          localStorage.setItem('user', JSON.stringify(userData));
+        }
+      } catch (err) {
+        console.error('Error fetching user:', err);
+      }
+      
       router.push('/');
     } catch (err) {
       setError('ایمیل یا رمز عبور اشتباه است');
