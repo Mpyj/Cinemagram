@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Hero from '@/components/home/Hero';
 import CategoryTabs from '@/components/home/CategoryTabs';
@@ -13,10 +13,19 @@ import { getContent } from '@/lib/api';
 
 export default function Home() {
   const router = useRouter();
-  const [activeCategory, setActiveCategory] = useState('movies');
+  const searchParams = useSearchParams();
+  const catParam = searchParams.get('cat');
+
+  const [activeCategory, setActiveCategory] = useState(catParam || 'movies');
   const [contents, setContents] = useState<Content[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (catParam) {
+      setActiveCategory(catParam);
+    }
+  }, [catParam]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -89,9 +98,7 @@ export default function Home() {
           )}
         </section>
       </main>
-      <div className="footer">
-        © ۱۴۰۵ سینماگرام — تمامی حقوق محفوظ است
-      </div>
+      <Footer />
       <BackToTop />
     </>
   );
