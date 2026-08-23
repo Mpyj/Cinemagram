@@ -10,6 +10,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -23,6 +25,17 @@ export default function Navbar() {
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     setIsLoggedIn(!!token);
+
+    const user = localStorage.getItem('user');
+    if (user) {
+      try {
+        const parsed = JSON.parse(user);
+        setUserRole(parsed.role || '');
+        setUsername(parsed.username || '');
+      } catch {
+        // ignore
+      }
+    }
   }, []);
 
   const handleSearch = () => {
@@ -32,18 +45,12 @@ export default function Navbar() {
     }
   };
 
-  const handleLogoClick = () => {
-    router.push('/');
-  };
+  const isAdmin = userRole === 'admin' || userRole === 'owner';
 
   return (
     <>
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} id="navbar">
-        <a
-          className="logo"
-          onClick={handleLogoClick}
-          style={{ cursor: 'pointer' }}
-        >
+        <a className="logo" onClick={() => router.push('/')} style={{ cursor: 'pointer' }}>
           <span className="logo-icon">🎬</span>
           سینماگرام
         </a>
@@ -53,6 +60,7 @@ export default function Navbar() {
           <li><a href="/?cat=movies">فیلم‌ها</a></li>
           <li><a href="/?cat=series">سریال‌ها</a></li>
           <li><a href="/?cat=anime">انیمه‌ها</a></li>
+          {isAdmin && <li><a href="/admin">مدیریت</a></li>}
         </ul>
 
         <div className="nav-actions">
@@ -73,13 +81,14 @@ export default function Navbar() {
           </button>
 
           {isLoggedIn ? (
-            <a href="/profile" className="btn-login">👤 پروفایل</a>
+            <a href="/profile" className="btn-login">
+              👤 {username || 'پروفایل'}
+            </a>
           ) : (
             <a href="/login" className="btn-login">ورود</a>
           )}
         </div>
 
-        {/* دکمه موبایل */}
         <button
           className="mobile-hamburger"
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -99,7 +108,6 @@ export default function Navbar() {
         </button>
       </nav>
 
-      {/* منوی موبایل */}
       {mobileOpen && (
         <div
           style={{
@@ -121,6 +129,9 @@ export default function Navbar() {
           <a href="/?cat=movies" className="btn-secondary" style={{ width: '80%', justifyContent: 'center' }} onClick={() => setMobileOpen(false)}>فیلم‌ها</a>
           <a href="/?cat=series" className="btn-secondary" style={{ width: '80%', justifyContent: 'center' }} onClick={() => setMobileOpen(false)}>سریال‌ها</a>
           <a href="/?cat=anime" className="btn-secondary" style={{ width: '80%', justifyContent: 'center' }} onClick={() => setMobileOpen(false)}>انیمه‌ها</a>
+          {isAdmin && (
+            <a href="/admin" className="btn-secondary" style={{ width: '80%', justifyContent: 'center' }} onClick={() => setMobileOpen(false)}>مدیریت</a>
+          )}
           
           <div className="search-box" style={{ width: '80%' }}>
             <span>🔍</span>
@@ -136,7 +147,9 @@ export default function Navbar() {
           </div>
 
           {isLoggedIn ? (
-            <a href="/profile" className="btn-login" onClick={() => setMobileOpen(false)}>👤 پروفایل</a>
+            <a href="/profile" className="btn-login" onClick={() => setMobileOpen(false)}>
+              👤 {username || 'پروفایل'}
+            </a>
           ) : (
             <a href="/login" className="btn-login" onClick={() => setMobileOpen(false)}>ورود</a>
           )}

@@ -1,17 +1,63 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 
 export default function AdminPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('content');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    const user = localStorage.getItem('user');
+
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    if (user) {
+      try {
+        const parsed = JSON.parse(user);
+        if (parsed.role === 'admin' || parsed.role === 'owner') {
+          setIsAdmin(true);
+        } else {
+          router.push('/');
+        }
+      } catch {
+        router.push('/');
+      }
+    } else {
+      router.push('/');
+    }
+
+    setLoading(false);
+  }, []);
 
   const tabs = [
     { id: 'content', label: '🎬 محتوا' },
     { id: 'users', label: '👥 کاربران' },
     { id: 'comments', label: '💬 نظرات' },
   ];
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+          در حال بارگذاری...
+        </div>
+      </>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <>

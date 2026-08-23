@@ -21,6 +21,22 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Check token expiration on response
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // ===== Content APIs =====
 export const getContent = async (params?: Record<string, string | number | undefined>) => {
   const response = await api.get('/content', { params });
@@ -68,6 +84,23 @@ export const login = async (data: LoginRequest) => {
 export const register = async (data: RegisterRequest) => {
   const response = await api.post('/auth/register', data);
   return response.data as User;
+};
+
+// ===== User APIs =====
+export const getMyProfile = async () => {
+  const response = await api.get('/users/me');
+  return response.data as User;
+};
+
+export const uploadAvatar = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post('/users/avatar', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
 };
 
 // ===== Watchlist APIs =====

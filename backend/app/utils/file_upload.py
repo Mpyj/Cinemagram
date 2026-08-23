@@ -7,14 +7,7 @@ from ..core.config import settings
 
 def save_upload_file(upload_file: UploadFile, folder: str) -> str:
     """
-    Save uploaded file and return file URL
-    
-    Args:
-        upload_file: The uploaded file
-        folder: Subfolder in uploads directory (e.g., 'posters', 'avatars')
-    
-    Returns:
-        str: The URL path to the saved file
+    Save uploaded file and return FULL URL
     """
     # Validate file type
     allowed_types = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
@@ -24,8 +17,10 @@ def save_upload_file(upload_file: UploadFile, folder: str) -> str:
             detail="Invalid file type. Only images are allowed."
         )
     
-    # Validate file size
+    # Read file content
     content = upload_file.file.read()
+    
+    # Validate file size
     if len(content) > settings.MAX_UPLOAD_SIZE:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -45,27 +40,26 @@ def save_upload_file(upload_file: UploadFile, folder: str) -> str:
     with open(file_path, "wb") as f:
         f.write(content)
     
-    # Return URL
-    return f"/uploads/{folder}/{unique_filename}"
+    # Return FULL URL
+    return f"http://localhost:8000/uploads/{folder}/{unique_filename}"
 
 
 def delete_upload_file(file_url: str) -> bool:
     """
     Delete uploaded file
-    
-    Args:
-        file_url: URL path of the file to delete
-    
-    Returns:
-        bool: True if deleted, False if not found
     """
-    if not file_url or not file_url.startswith("/uploads/"):
+    if not file_url:
         return False
     
-    # Convert URL to file path
-    relative_path = file_url.replace("/uploads/", "")
-    file_path = Path(settings.UPLOAD_DIR) / relative_path
+    # Extract path from URL
+    if "http://localhost:8000" in file_url:
+        relative_path = file_url.replace("http://localhost:8000/", "")
+    elif file_url.startswith("/uploads/"):
+        relative_path = file_url.replace("/", "", 1)
+    else:
+        return False
     
+    file_path = Path(relative_path)
     if file_path.exists():
         file_path.unlink()
         return True

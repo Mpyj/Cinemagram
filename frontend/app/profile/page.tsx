@@ -5,55 +5,51 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import BackToTop from '@/components/ui/BackToTop';
+import { getMyProfile, uploadAvatar } from '@/lib/api';
+
+interface UserProfile {
+  id: number;
+  username: string;
+  email: string;
+  avatar_url: string | null;
+  bio: string | null;
+  created_at: string;
+}
 
 export default function ProfilePage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('watchlist');
-  const [userData, setUserData] = useState<{
-    username: string;
-    email: string;
-    avatar_url: string | null;
-    created_at: string;
-    bio: string;
-  } | null>(null);
+  const [userData, setUserData] = useState<UserProfile | null>(null);
   const [showFullDate, setShowFullDate] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
-    const user = localStorage.getItem('user');
-    
     if (!token) {
       router.push('/login');
       return;
     }
 
-    if (user) {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
       try {
-        const parsedUser = JSON.parse(user);
-        setUserData(parsedUser);
+        const parsed = JSON.parse(savedUser);
+        setUserData(parsed);
       } catch {
-        // اگه user ذخیره نشده، از API بگیر
-        fetchUserProfile(token);
+        fetchProfile();
       }
     } else {
-      fetchUserProfile(token);
+      fetchProfile();
     }
   }, []);
 
-  const fetchUserProfile = async (token: string) => {
+  const fetchProfile = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/users/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUserData(data);
-        localStorage.setItem('user', JSON.stringify(data));
-      }
+      const data = await getMyProfile();
+      setUserData(data);
+      localStorage.setItem('user', JSON.stringify(data));
     } catch (err) {
       console.error('Error fetching profile:', err);
     }
@@ -65,7 +61,6 @@ export default function ProfilePage() {
 
     setAvatarFile(file);
     
-    // پیش‌نمایش عکس
     const reader = new FileReader();
     reader.onload = (event) => {
       setAvatarPreview(event.target?.result as string);
@@ -76,38 +71,36 @@ export default function ProfilePage() {
   const handleAvatarSubmit = async () => {
     if (!avatarFile) return;
 
-    const token = localStorage.getItem('access_token');
-    if (!token) return;
-
-    const formData = new FormData();
-    formData.append('file', avatarFile);
-
+    setUploading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/v1/users/avatar', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUserData((prev) => prev ? { ...prev, avatar_url: data.avatar_url } : prev);
-        localStorage.setItem('user', JSON.stringify({ ...userData, avatar_url: data.avatar_url }));
+      const result = await uploadAvatar(avatarFile);
+      console.log('Upload result:', result);
+      
+      if (result?.avatar_url) {
+        const fullUrl = result.avatar_url;
+        
+        setUserData((prev) => prev ? { ...prev, avatar_url: fullUrl } : prev);
+        
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          parsed.avatar_url = fullUrl;
+          localStorage.setItem('user', JSON.stringify(parsed));
+        }
+        
         setAvatarFile(null);
         setAvatarPreview(null);
         alert('عکس پروفایل آپدیت شد!');
-      } else {
-        alert('خطا در آپلود عکس');
       }
     } catch (err) {
       console.error('Upload error:', err);
       alert('خطا در آپلود عکس');
+    } finally {
+      setUploading(false);
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatFullDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('fa-IR', {
       year: 'numeric',
@@ -116,7 +109,7 @@ export default function ProfilePage() {
     }).format(date);
   };
 
-  const formatYear = (dateString: string) => {
+  const formatYearOnly = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('fa-IR', {
       year: 'numeric',
@@ -138,23 +131,28 @@ export default function ProfilePage() {
         <div className="profile-card">
           <div className="profile-header">
             {/* عکس پروفایل */}
-            <div className="profile-avatar" style={{ position: 'relative', overflow: 'visible' }}>
-              {avatarPreview || userData?.avatar_url ? (
-                <img
-                  src={avatarPreview || userData?.avatar_url}
-                  alt="avatar"
-                  style={{
-                    width: '90px',
-                    height: '90px',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                  }}
-                />
-              ) : (
-                '👤'
-              )}
+            <div style={{ position: 'relative' }}>
+              <div className="profile-avatar" style={{ overflow: 'hidden' }}>
+                {avatarPreview || userData?.avatar_url ? (
+                  <img
+                    src={avatarPreview || userData?.avatar_url || ''}
+                    alt="پروفایل"
+                    style={{
+                      width: '90px',
+                      height: '90px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                    }}
+                    onError={(e) => {
+                      // اگه عکس لود نشد، ایموجی نشون بده
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <span style={{ fontSize: '40px' }}>👤</span>
+                )}
+              </div>
               
-              {/* دکمه آپلود */}
               <label
                 style={{
                   position: 'absolute',
@@ -170,7 +168,7 @@ export default function ProfilePage() {
                   cursor: 'pointer',
                   fontSize: '14px',
                   border: '2px solid var(--bg)',
-                  transition: 'all 0.3s',
+                  zIndex: 3,
                 }}
               >
                 📷
@@ -185,7 +183,7 @@ export default function ProfilePage() {
 
             <div>
               <h1 className="profile-name">
-                {userData?.username || 'کاربر'}
+                {userData?.username || '...'}
               </h1>
               <p className="profile-info">
                 عضویت از{' '}
@@ -196,13 +194,13 @@ export default function ProfilePage() {
                     color: 'var(--secondary)',
                     fontWeight: 700,
                     textDecoration: 'underline',
-                    transition: 'all 0.3s',
                   }}
-                  title={showFullDate ? 'نمایش سال' : 'نمایش تاریخ کامل'}
                 >
-                  {showFullDate
-                    ? formatDate(userData?.created_at || new Date().toISOString())
-                    : formatYear(userData?.created_at || new Date().toISOString())}
+                  {userData?.created_at
+                    ? (showFullDate
+                        ? formatFullDate(userData.created_at)
+                        : formatYearOnly(userData.created_at))
+                    : '...'}
                 </span>
               </p>
               {userData?.email && (
@@ -212,18 +210,18 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* دکمه ثبت آپلود */}
             {avatarFile && (
               <button
                 className="btn-primary"
                 onClick={handleAvatarSubmit}
+                disabled={uploading}
                 style={{
                   padding: '8px 20px',
                   fontSize: '0.8rem',
                   marginRight: 'auto',
                 }}
               >
-                ذخیره عکس
+                {uploading ? 'در حال آپلود...' : 'ذخیره عکس'}
               </button>
             )}
           </div>
@@ -249,13 +247,11 @@ export default function ProfilePage() {
               هنوز محتوایی به علاقه‌مندی‌ها اضافه نکردید
             </div>
           )}
-
           {activeTab === 'comments' && (
             <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '30px 0' }}>
               هنوز نظری ثبت نکردید
             </div>
           )}
-
           {activeTab === 'settings' && (
             <form>
               <div className="form-group">
@@ -264,7 +260,6 @@ export default function ProfilePage() {
                   type="text"
                   className="form-input"
                   defaultValue={userData?.username || ''}
-                  placeholder="username"
                 />
               </div>
               <div className="form-group">
@@ -273,7 +268,6 @@ export default function ProfilePage() {
                   type="email"
                   className="form-input"
                   defaultValue={userData?.email || ''}
-                  placeholder="example@email.com"
                 />
               </div>
               <div className="form-group">

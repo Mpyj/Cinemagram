@@ -20,7 +20,7 @@ export default function LoginPage() {
       const response = await login({ email, password });
       localStorage.setItem('access_token', response.access_token);
       
-      // بعد از ورود، پروفایل کاربر رو هم بگیر
+      // گرفتن پروفایل کاربر
       try {
         const userResponse = await fetch('http://localhost:8000/api/v1/users/me', {
           headers: {
