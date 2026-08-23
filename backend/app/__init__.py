@@ -1,0 +1,3 @@
+"""
+Cinemagram Backend Application
+"""

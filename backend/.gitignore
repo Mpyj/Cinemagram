@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+*.egg-info/
+
+# Environment
+.env
+*.env.local
+
+# Uploads (اختیاری - اگه نمی‌خوای آپلودها رو کامیت کنی)
+uploads/
+
+# Database
+*.db
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
