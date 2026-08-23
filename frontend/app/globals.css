@@ -1,25 +1,40 @@
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;300;400;500;700;800;900&display=swap');
 @import "tailwindcss";
+
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-display: swap;
+}
 
 :root {
   --bg-primary: #0a0a0f;
   --bg-secondary: #12121a;
-  --bg-card: rgba(255, 255, 255, 0.03);
-  --bg-card-hover: rgba(255, 255, 255, 0.06);
-  --border-glass: rgba(255, 255, 255, 0.08);
-  --border-glass-hover: rgba(255, 255, 255, 0.2);
   --text-primary: #f0f0f5;
   --text-secondary: #a0a0b8;
   --text-muted: #6b6b85;
-  --accent-1: #ff6b6b;
-  --accent-2: #ffa500;
-  --accent-3: #7c3aed;
-  --accent-4: #06b6d4;
-  --accent-5: #10b981;
-  --gradient-hero: linear-gradient(135deg, #ff6b6b, #7c3aed, #06b6d4);
-  --gradient-movie: linear-gradient(135deg, #ff6b6b, #ff4500);
-  --gradient-series: linear-gradient(135deg, #7c3aed, #4f46e5);
-  --gradient-anime: linear-gradient(135deg, #06b6d4, #10b981);
+}
+
+.light {
+  --bg-primary: #f5f5fa;
+  --bg-secondary: #ffffff;
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a4a6a;
+  --text-muted: #8a8aa8;
 }
 
 * {
@@ -40,9 +55,9 @@ body {
   min-height: 100vh;
   line-height: 1.8;
   letter-spacing: -0.01em;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -52,6 +67,6 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--accent-1), var(--accent-3));
+  background: linear-gradient(180deg, #ff6b6b, #7c3aed);
   border-radius: 10px;
 }

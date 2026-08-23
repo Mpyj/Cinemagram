@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,7 +35,6 @@ export default function Navbar() {
             : 'bg-black/75 backdrop-blur-2xl border-white/10'
         }`}
       >
-        {/* لوگو */}
         <a href="#" className="flex items-center gap-2.5">
           <motion.span
             className="text-3xl"
@@ -47,7 +48,6 @@ export default function Navbar() {
           </span>
         </a>
 
-        {/* لینک‌های دسکتاپ */}
         <ul className="hidden md:flex items-center gap-7">
           {navLinks.map((link) => (
             <li key={link.href}>
@@ -68,12 +68,7 @@ export default function Navbar() {
           ))}
         </ul>
 
-        {/* جستجو */}
-        <div
-          className={`hidden lg:flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 transition-all ${
-            searchOpen ? 'border-purple-500 shadow-lg shadow-purple-500/20' : ''
-          }`}
-        >
+        <div className="hidden lg:flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2">
           <span>🔍</span>
           <input
             type="text"
@@ -83,20 +78,24 @@ export default function Navbar() {
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setSearchOpen(true)}
           />
-          <kbd className="text-xs bg-white/10 border border-white/10 rounded px-1.5 py-0.5 text-gray-400">
-            Esc
-          </kbd>
         </div>
 
-        {/* دکمه ورود */}
-        <a
-          href="/login"
-          className="hidden md:block bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 px-6 py-2.5 rounded-full font-bold text-sm text-white hover:shadow-lg hover:shadow-red-500/50 hover:-translate-y-0.5 transition-all duration-300"
-        >
-          شروع رایگان
-        </a>
+        <div className="hidden md:flex items-center gap-3">
+          <button
+            onClick={toggleTheme}
+            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xl hover:bg-white/10 transition-all"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
 
-        {/* دکمه منوی موبایل */}
+          <a
+            href="/login"
+            className="bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 px-6 py-2.5 rounded-full font-bold text-sm text-white hover:shadow-lg hover:shadow-red-500/50 hover:-translate-y-0.5 transition-all duration-300"
+          >
+            شروع رایگان
+          </a>
+        </div>
+
         <button
           className="md:hidden flex flex-col gap-1.5 p-2 z-50"
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -119,7 +118,6 @@ export default function Navbar() {
         </button>
       </nav>
 
-      {/* منوی موبایل */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -142,13 +140,12 @@ export default function Navbar() {
               ))}
             </ul>
 
-            <div className="w-full max-w-[320px] px-4">
-              <input
-                type="text"
-                placeholder="جستجو..."
-                className="w-full px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white outline-none focus:border-purple-500"
-              />
-            </div>
+            <button
+              onClick={toggleTheme}
+              className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-2xl"
+            >
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
 
             <a
               href="/login"

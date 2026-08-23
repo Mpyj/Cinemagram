@@ -5,7 +5,7 @@ import Navbar from '@/components/layout/Navbar';
 import Hero from '@/components/home/Hero';
 import CategoryTabs from '@/components/home/CategoryTabs';
 import ContentGrid from '@/components/home/ContentGrid';
-import ContentModal from '../components/content/ContentModal';
+import ContentModal from '@/components/content/ContentModal';
 import Footer from '@/components/layout/Footer';
 import BackToTop from '@/components/ui/BackToTop';
 import { Content } from '@/lib/types';
@@ -115,7 +115,7 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <main className="bg-[#0a0a0f]">
+      <main className="bg-[var(--bg-primary)] min-h-screen">
         <Hero />
         <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
         <ContentGrid 
