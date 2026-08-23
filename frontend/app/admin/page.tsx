@@ -8,7 +8,7 @@ import Footer from '@/components/layout/Footer';
 export default function AdminPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('content');
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function AdminPage() {
       try {
         const parsed = JSON.parse(user);
         if (parsed.role === 'admin' || parsed.role === 'owner') {
-          setIsAdmin(true);
+          setUserRole(parsed.role);
         } else {
           router.push('/');
         }
@@ -38,10 +38,13 @@ export default function AdminPage() {
     setLoading(false);
   }, []);
 
+  const isOwner = userRole === 'owner';
+
   const tabs = [
     { id: 'content', label: '🎬 محتوا' },
     { id: 'users', label: '👥 کاربران' },
     { id: 'comments', label: '💬 نظرات' },
+    ...(isOwner ? [{ id: 'roles', label: '👑 نقش‌ها' }] : []),
   ];
 
   if (loading) {
@@ -55,17 +58,30 @@ export default function AdminPage() {
     );
   }
 
-  if (!isAdmin) {
-    return null;
-  }
-
   return (
     <>
       <Navbar />
       <div className="admin-container">
         <div className="hero-bg"></div>
         <div className="admin-header">
-          <h1 className="page-title">پنل مدیریت</h1>
+          <h1 className="page-title">
+            پنل مدیریت
+            <span
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                padding: '4px 14px',
+                borderRadius: '20px',
+                marginRight: '10px',
+                background: isOwner
+                  ? 'linear-gradient(135deg, #fdcb6e, #fd79a8)'
+                  : 'linear-gradient(135deg, #6c5ce7, #a29bfe)',
+                color: 'white',
+              }}
+            >
+              {isOwner ? 'مالک' : 'ادمین'}
+            </span>
+          </h1>
         </div>
 
         <div className="tabs-section">
@@ -129,6 +145,39 @@ export default function AdminPage() {
                   </div>
                   <button className="btn-secondary" style={{ padding: '6px 16px', fontSize: '0.75rem', color: '#10b981', borderColor: 'rgba(16,185,129,0.3)' }}>تایید</button>
                   <button className="btn-secondary" style={{ padding: '6px 16px', fontSize: '0.75rem', color: '#fd79a8', borderColor: 'rgba(253,121,168,0.3)' }}>حذف</button>
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* تب مخصوص Owner */}
+          {activeTab === 'roles' && isOwner && (
+            <>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '20px' }}>
+                مدیریت نقش‌ها
+              </h2>
+              {[
+                { id: 1, name: 'کاربر ۱', role: 'user' },
+                { id: 2, name: 'کاربر ۲', role: 'admin' },
+                { id: 3, name: 'کاربر ۳', role: 'user' },
+              ].map((user) => (
+                <div key={user.id} className="admin-item">
+                  <span style={{ fontSize: '28px' }}>👤</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{user.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      نقش فعلی: {user.role === 'admin' ? 'ادمین' : 'کاربر'}
+                    </div>
+                  </div>
+                  {user.role === 'user' ? (
+                    <button className="btn-secondary" style={{ padding: '6px 16px', fontSize: '0.75rem', color: '#a29bfe', borderColor: 'rgba(162,155,254,0.3)' }}>
+                      ارتقا به ادمین
+                    </button>
+                  ) : (
+                    <button className="btn-secondary" style={{ padding: '6px 16px', fontSize: '0.75rem', color: '#fd79a8', borderColor: 'rgba(253,121,168,0.3)' }}>
+                      تنزل به کاربر
+                    </button>
+                  )}
                 </div>
               ))}
             </>

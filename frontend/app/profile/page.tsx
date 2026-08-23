@@ -11,6 +11,7 @@ interface UserProfile {
   id: number;
   username: string;
   email: string;
+  role: string;
   avatar_url: string | null;
   bio: string | null;
   created_at: string;
@@ -55,6 +56,12 @@ export default function ProfilePage() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
+    router.push('/login');
+  };
+
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -74,17 +81,14 @@ export default function ProfilePage() {
     setUploading(true);
     try {
       const result = await uploadAvatar(avatarFile);
-      console.log('Upload result:', result);
       
       if (result?.avatar_url) {
-        const fullUrl = result.avatar_url;
-        
-        setUserData((prev) => prev ? { ...prev, avatar_url: fullUrl } : prev);
+        setUserData((prev) => prev ? { ...prev, avatar_url: result.avatar_url } : prev);
         
         const savedUser = localStorage.getItem('user');
         if (savedUser) {
           const parsed = JSON.parse(savedUser);
-          parsed.avatar_url = fullUrl;
+          parsed.avatar_url = result.avatar_url;
           localStorage.setItem('user', JSON.stringify(parsed));
         }
         
@@ -122,6 +126,15 @@ export default function ProfilePage() {
     { id: 'settings', label: '⚙️ تنظیمات' },
   ];
 
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'owner': return 'مالک';
+      case 'admin': return 'ادمین';
+      case 'user': return 'کاربر';
+      default: return role;
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -130,7 +143,6 @@ export default function ProfilePage() {
 
         <div className="profile-card">
           <div className="profile-header">
-            {/* عکس پروفایل */}
             <div style={{ position: 'relative' }}>
               <div className="profile-avatar" style={{ overflow: 'hidden' }}>
                 {avatarPreview || userData?.avatar_url ? (
@@ -142,10 +154,6 @@ export default function ProfilePage() {
                       height: '90px',
                       borderRadius: '50%',
                       objectFit: 'cover',
-                    }}
-                    onError={(e) => {
-                      // اگه عکس لود نشد، ایموجی نشون بده
-                      (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
                 ) : (
@@ -181,9 +189,29 @@ export default function ProfilePage() {
               </label>
             </div>
 
-            <div>
+            <div style={{ flex: 1 }}>
               <h1 className="profile-name">
                 {userData?.username || '...'}
+                {userData?.role && (
+                  <span
+                    style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      padding: '3px 10px',
+                      borderRadius: '20px',
+                      marginRight: '8px',
+                      background: userData.role === 'owner'
+                        ? 'linear-gradient(135deg, #fdcb6e, #fd79a8)'
+                        : userData.role === 'admin'
+                          ? 'linear-gradient(135deg, #6c5ce7, #a29bfe)'
+                          : 'var(--bg-card)',
+                      color: userData.role === 'user' ? 'var(--text-muted)' : 'white',
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    {getRoleLabel(userData.role)}
+                  </span>
+                )}
               </h1>
               <p className="profile-info">
                 عضویت از{' '}
@@ -210,6 +238,20 @@ export default function ProfilePage() {
               )}
             </div>
 
+            {/* دکمه خروج */}
+            <button
+              className="btn-secondary"
+              onClick={handleLogout}
+              style={{
+                padding: '8px 18px',
+                fontSize: '0.8rem',
+                color: '#fd79a8',
+                borderColor: 'rgba(253,121,168,0.3)',
+              }}
+            >
+              🚪 خروج
+            </button>
+
             {avatarFile && (
               <button
                 className="btn-primary"
@@ -218,7 +260,6 @@ export default function ProfilePage() {
                 style={{
                   padding: '8px 20px',
                   fontSize: '0.8rem',
-                  marginRight: 'auto',
                 }}
               >
                 {uploading ? 'در حال آپلود...' : 'ذخیره عکس'}
