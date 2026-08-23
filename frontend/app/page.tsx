@@ -15,6 +15,7 @@ const sampleMovies: Content[] = [
     id: 1,
     title: 'اینتراستلر',
     slug: 'interstellar',
+    description: 'تیمی از کاوش‌گران فضایی برای یافتن خانه‌ای جدید برای بشر، از طریق یک سوراخ کرمی به کاوش می‌پردازند.',
     type: 'movie',
     status: 'published',
     release_year: 2014,
@@ -30,6 +31,7 @@ const sampleMovies: Content[] = [
     id: 2,
     title: 'اوپنهایمر',
     slug: 'oppenheimer',
+    description: 'زندگی جی. رابرت اوپنهایمر، فیزیکدان آمریکایی که در توسعه بمب اتمی نقش کلیدی داشت.',
     type: 'movie',
     status: 'published',
     release_year: 2023,
@@ -47,6 +49,7 @@ const sampleSeries: Content[] = [
     id: 3,
     title: 'بریکینگ بد',
     slug: 'breaking-bad',
+    description: 'یک معلم شیمی به ساخت مواد مخدر می‌پردازد.',
     type: 'series',
     status: 'published',
     release_year: 2008,
@@ -64,6 +67,7 @@ const sampleAnime: Content[] = [
     id: 4,
     title: 'حمله تیتان‌ها',
     slug: 'attack-on-titan',
+    description: 'بشر در برابر تیتان‌های غول‌پیکر برای بقا می‌جنگد.',
     type: 'anime',
     status: 'published',
     release_year: 2013,
@@ -120,14 +124,57 @@ export default function Home() {
     <>
       <Navbar />
       <main className="bg-[var(--bg-primary)] min-h-screen">
-        <Hero />
-        <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
-        <ContentGrid 
-          contents={getFilteredContent()} 
-          title={title} 
-          emoji={emoji}
-          onCardClick={handleCardClick}
-        />
+        <section id="home">
+          <Hero />
+        </section>
+        
+        <section id="categories">
+          <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
+        </section>
+        
+        <section id="movies">
+          {activeCategory === 'movies' && (
+            <ContentGrid 
+              contents={sampleMovies} 
+              title="فیلم‌های پیشنهادی" 
+              emoji="🎬"
+              onCardClick={handleCardClick}
+            />
+          )}
+        </section>
+        
+        <section id="series">
+          {activeCategory === 'series' && (
+            <ContentGrid 
+              contents={sampleSeries} 
+              title="سریال‌های داغ" 
+              emoji="📺"
+              onCardClick={handleCardClick}
+            />
+          )}
+        </section>
+        
+        <section id="anime">
+          {activeCategory === 'anime' && (
+            <ContentGrid 
+              contents={sampleAnime} 
+              title="انیمه‌های محبوب" 
+              emoji="✨"
+              onCardClick={handleCardClick}
+            />
+          )}
+        </section>
+        
+        <section id="all">
+          {activeCategory === 'all' && (
+            <ContentGrid 
+              contents={[...sampleMovies, ...sampleSeries, ...sampleAnime]} 
+              title="همه عناوین" 
+              emoji="🌟"
+              onCardClick={handleCardClick}
+            />
+          )}
+        </section>
       </main>
       <Footer />
       <BackToTop />

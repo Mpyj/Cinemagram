@@ -5,39 +5,96 @@ import { useParams } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import BackToTop from '@/components/ui/BackToTop';
-import { Content, Episode } from '@/lib/types';
-import { getContentBySlug, getEpisodes } from '@/lib/api';
+import { Content } from '@/lib/types';
+
+const sampleData: Record<string, Content> = {
+  'interstellar': {
+    id: 1,
+    title: 'اینتراستلر',
+    slug: 'interstellar',
+    description: 'تیمی از کاوش‌گران فضایی برای یافتن خانه‌ای جدید برای بشر، از طریق یک سوراخ کرمی به کاوش می‌پردازند.',
+    type: 'movie',
+    status: 'published',
+    release_year: 2014,
+    rating: 8.6,
+    country: 'USA',
+    language: 'English',
+    views_count: 1200,
+    genres: [
+      { id: 1, name: 'علمی-تخیلی', slug: 'sci-fi' },
+      { id: 2, name: 'ماجراجویی', slug: 'adventure' },
+    ],
+    created_at: '2024-01-01',
+  },
+  'oppenheimer': {
+    id: 2,
+    title: 'اوپنهایمر',
+    slug: 'oppenheimer',
+    description: 'زندگی جی. رابرت اوپنهایمر، فیزیکدان آمریکایی که در توسعه بمب اتمی نقش کلیدی داشت.',
+    type: 'movie',
+    status: 'published',
+    release_year: 2023,
+    rating: 8.3,
+    country: 'USA',
+    language: 'English',
+    views_count: 980,
+    genres: [
+      { id: 3, name: 'درام', slug: 'drama' },
+    ],
+    created_at: '2024-01-02',
+  },
+  'breaking-bad': {
+    id: 3,
+    title: 'بریکینگ بد',
+    slug: 'breaking-bad',
+    description: 'یک معلم شیمی به ساخت مواد مخدر می‌پردازد.',
+    type: 'series',
+    status: 'published',
+    release_year: 2008,
+    rating: 9.5,
+    country: 'USA',
+    language: 'English',
+    views_count: 2500,
+    genres: [
+      { id: 5, name: 'جرایم', slug: 'crime' },
+    ],
+    created_at: '2024-01-03',
+  },
+  'attack-on-titan': {
+    id: 4,
+    title: 'حمله تیتان‌ها',
+    slug: 'attack-on-titan',
+    description: 'بشر در برابر تیتان‌های غول‌پیکر برای بقا می‌جنگد.',
+    type: 'anime',
+    status: 'published',
+    release_year: 2013,
+    rating: 9.0,
+    country: 'Japan',
+    language: 'Japanese',
+    views_count: 3000,
+    genres: [
+      { id: 6, name: 'اکشن', slug: 'action' },
+    ],
+    created_at: '2024-01-04',
+  },
+};
 
 export default function ContentDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
 
   const [content, setContent] = useState<Content | null>(null);
-  const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const data = await getContentBySlug(slug);
-        setContent(data);
-
-        if (data.type === 'series' || data.type === 'anime') {
-          const eps = await getEpisodes(data.id);
-          setEpisodes(eps);
-        }
-      } catch (err) {
-        setError('خطا در دریافت اطلاعات');
-      } finally {
-        setLoading(false);
+    const timer = setTimeout(() => {
+      if (slug && sampleData[slug]) {
+        setContent(sampleData[slug]);
       }
-    };
+      setLoading(false);
+    }, 0);
 
-    if (slug) {
-      fetchData();
-    }
+    return () => clearTimeout(timer);
   }, [slug]);
 
   const getGradient = (type: string) => {
@@ -78,12 +135,12 @@ export default function ContentDetailPage() {
     );
   }
 
-  if (error || !content) {
+  if (!content) {
     return (
       <>
         <Navbar />
         <main className="bg-[var(--bg-primary)] min-h-screen pt-[76px] flex items-center justify-center">
-          <div className="text-xl text-red-400">{error || 'محتوا یافت نشد'}</div>
+          <div className="text-xl text-red-400">محتوا یافت نشد</div>
         </main>
         <Footer />
       </>
@@ -94,23 +151,20 @@ export default function ContentDetailPage() {
     <>
       <Navbar />
       <main className="bg-[var(--bg-primary)] min-h-screen pt-[76px]">
-        {/* بنر */}
         <div
-          className="relative h-[400px] md:h-[500px] flex items-center justify-center"
+          className="relative h-[300px] md:h-[400px] flex items-center justify-center"
           style={{ background: getGradient(content.type) }}
         >
-          <span className="text-[120px] md:text-[160px]">{getEmoji(content.type)}</span>
+          <span className="text-[100px] md:text-[140px]">{getEmoji(content.type)}</span>
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] to-transparent" />
         </div>
 
-        <div className="max-w-5xl mx-auto px-4 -mt-40 relative z-10">
+        <div className="max-w-5xl mx-auto px-4 -mt-32 relative z-10">
           <div className="bg-[var(--bg-secondary)] border border-[var(--border-glass)] rounded-3xl p-6 md:p-10">
-            {/* عنوان */}
             <h1 className="text-3xl md:text-4xl font-black mb-4 text-[var(--text-primary)]">
               {content.title}
             </h1>
 
-            {/* متا */}
             <div className="flex gap-4 text-sm text-[var(--text-secondary)] mb-4 flex-wrap">
               <span>📅 {content.release_year || 'نامشخص'}</span>
               <span>🎭 {content.genres?.map(g => g.name).join('، ') || 'نامشخص'}</span>
@@ -118,10 +172,8 @@ export default function ContentDetailPage() {
                 {content.type === 'movie' ? '🎬 فیلم' : content.type === 'series' ? '📺 سریال' : '✨ انیمه'}
               </span>
               {content.country && <span>🌍 {content.country}</span>}
-              {content.language && <span>🗣 {content.language}</span>}
             </div>
 
-            {/* امتیاز */}
             <div className="flex items-center gap-3 mb-6">
               <span className="text-3xl font-black text-yellow-500">{content.rating || 'N/A'}</span>
               <span className="text-yellow-500 text-xl">
@@ -133,7 +185,6 @@ export default function ContentDetailPage() {
               </span>
             </div>
 
-            {/* ژانرها */}
             <div className="flex gap-2 flex-wrap mb-6">
               {content.genres?.map((genre) => (
                 <span
@@ -145,13 +196,11 @@ export default function ContentDetailPage() {
               ))}
             </div>
 
-            {/* توضیحات */}
             <p className="text-[var(--text-secondary)] leading-relaxed mb-8">
               {content.description || 'توضیحاتی ثبت نشده است.'}
             </p>
 
-            {/* دکمه‌ها */}
-            <div className="flex gap-3 flex-wrap mb-8">
+            <div className="flex gap-3 flex-wrap">
               <button className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 text-white font-bold hover:shadow-lg hover:shadow-red-500/50 hover:-translate-y-0.5 transition-all">
                 <span>▶</span>
                 تماشا
@@ -160,43 +209,7 @@ export default function ContentDetailPage() {
                 <span>❤️</span>
                 افزودن به علاقه‌مندی‌ها
               </button>
-              <button className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--bg-card)] border border-[var(--border-glass)] text-[var(--text-primary)] font-bold hover:bg-[var(--bg-card-hover)] hover:-translate-y-0.5 transition-all">
-                <span>📤</span>
-                اشتراک‌گذاری
-              </button>
             </div>
-
-            {/* اپیزودها */}
-            {(content.type === 'series' || content.type === 'anime') && episodes.length > 0 && (
-              <div className="border-t border-[var(--border-glass)] pt-6">
-                <h2 className="text-xl font-black mb-4 text-[var(--text-primary)]">
-                  📋 اپیزودها
-                </h2>
-                <div className="space-y-3">
-                  {episodes.map((episode) => (
-                    <div
-                      key={episode.id}
-                      className="flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-glass)] hover:bg-[var(--bg-card-hover)] transition-all"
-                    >
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-red-400 to-purple-500 flex items-center justify-center text-white font-bold">
-                        {episode.episode_number}
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-[var(--text-primary)]">
-                          {episode.title || `قسمت ${episode.episode_number}`}
-                        </h3>
-                        <p className="text-sm text-[var(--text-muted)]">
-                          فصل {episode.season_number} • قسمت {episode.episode_number}
-                        </p>
-                      </div>
-                      <button className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white hover:bg-white/10 transition-all">
-                        ▶ پخش
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </main>
