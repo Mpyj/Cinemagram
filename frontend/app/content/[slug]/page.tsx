@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import BackToTop from '@/components/ui/BackToTop';
@@ -10,6 +10,7 @@ import { getContentBySlug, getComments, addComment, addToWatchlist } from '@/lib
 
 export default function ContentDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = params?.slug as string;
 
   const [content, setContent] = useState<Content | null>(null);
@@ -18,6 +19,8 @@ export default function ContentDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [watchlistAdded, setWatchlistAdded] = useState(false);
+
+  const isLoggedIn = typeof window !== 'undefined' && !!localStorage.getItem('access_token');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,6 +47,11 @@ export default function ContentDetailPage() {
   }, [slug]);
 
   const handleAddComment = async () => {
+    if (!isLoggedIn) {
+      router.push('/login');
+      return;
+    }
+
     if (!newComment.trim() || !content) return;
 
     try {
@@ -60,6 +68,11 @@ export default function ContentDetailPage() {
   };
 
   const handleWatchlist = async () => {
+    if (!isLoggedIn) {
+      router.push('/login');
+      return;
+    }
+
     if (!content) return;
 
     try {
@@ -70,6 +83,15 @@ export default function ContentDetailPage() {
       console.error(err);
       alert('خطا در افزودن به علاقه‌مندی‌ها');
     }
+  };
+
+  const handleWatch = () => {
+    if (!isLoggedIn) {
+      router.push('/login');
+      return;
+    }
+    // اینجا می‌تونی لینک تماشا رو باز کنی
+    alert('لینک تماشا');
   };
 
   const getGradient = (type: string) => {
@@ -176,7 +198,10 @@ export default function ContentDetailPage() {
             </p>
 
             <div className="flex gap-3 flex-wrap mb-8">
-              <button className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 text-white font-bold hover:shadow-lg hover:shadow-red-500/50 hover:-translate-y-0.5 transition-all">
+              <button
+                onClick={handleWatch}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 text-white font-bold hover:shadow-lg hover:shadow-red-500/50 hover:-translate-y-0.5 transition-all"
+              >
                 <span>▶</span>
                 تماشا
               </button>
@@ -202,18 +227,27 @@ export default function ContentDetailPage() {
 
               {/* فرم کامنت */}
               <div className="mb-6">
+                {!isLoggedIn && (
+                  <div className="text-sm text-[var(--text-muted)] mb-3">
+                    برای ثبت نظر باید{' '}
+                    <a href="/login" className="text-purple-400 hover:underline">
+                      وارد شوید
+                    </a>
+                  </div>
+                )}
                 <textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="نظر خود را بنویسید..."
+                  placeholder={isLoggedIn ? "نظر خود را بنویسید..." : "برای ثبت نظر وارد شوید..."}
                   className="w-full px-4 py-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-glass)] text-[var(--text-primary)] outline-none focus:border-purple-500 transition-colors min-h-[100px] resize-y"
+                  disabled={!isLoggedIn}
                 />
                 <button
                   onClick={handleAddComment}
-                  disabled={!newComment.trim()}
+                  disabled={!newComment.trim() || !isLoggedIn}
                   className="mt-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 text-white font-bold hover:shadow-lg hover:shadow-red-500/30 transition-all disabled:opacity-50"
                 >
-                  ثبت نظر
+                  {isLoggedIn ? 'ثبت نظر' : 'ورود و ثبت نظر'}
                 </button>
               </div>
 

@@ -14,15 +14,15 @@ export default function CategoryTabs({ activeCategory, onCategoryChange }: Categ
   ];
 
   return (
-    <div className="flex gap-3 justify-center flex-wrap py-6 px-4">
+    <div className="flex gap-2 md:gap-3 justify-center flex-wrap py-5 md:py-6 px-4">
       {categories.map((cat) => (
         <button
           key={cat.id}
           onClick={() => onCategoryChange(cat.id)}
-          className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all duration-300 ${
+          className={`inline-flex items-center gap-1.5 md:gap-2 px-5 md:px-6 py-2.5 md:py-3 rounded-full text-sm md:text-base font-semibold whitespace-nowrap transition-all duration-300 ${
             activeCategory === cat.id
-              ? 'bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 text-white shadow-lg shadow-red-500/30'
-              : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10 hover:text-white'
+              ? 'bg-gradient-to-r from-[#6c5ce7] via-[#a29bfe] to-[#fd79a8] text-white shadow-lg shadow-purple-500/30'
+              : 'bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--bg-card-hover)] hover:text-[var(--text)] hover:-translate-y-0.5 active:scale-95'
           }`}
         >
           <span>{cat.emoji}</span>

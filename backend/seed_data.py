@@ -1,12 +1,26 @@
 from app.core.database import SessionLocal
-from app.models import Content, Genre, ContentType, ContentStatus
+from app.models import Content, Genre, ContentType, ContentStatus, User, UserRole
+from app.core.security import hash_password
 
 def seed_data():
     db = SessionLocal()
     
-    # Check if data exists
+    # Create default user if not exists
+    if db.query(User).count() == 0:
+        default_user = User(
+            username="admin",
+            email="admin@cinemagram.com",
+            hashed_password=hash_password("admin123"),
+            role=UserRole.OWNER,
+            is_active=True,
+        )
+        db.add(default_user)
+        db.commit()
+        print("Default user created: admin / admin123")
+    
+    # Check if content exists
     if db.query(Content).count() > 0:
-        print("Data already exists!")
+        print("Content already exists!")
         db.close()
         return
     
@@ -20,11 +34,9 @@ def seed_data():
         {"name": "فانتزی", "slug": "fantasy"},
     ]
     
-    genres = []
     for g in genres_data:
         genre = Genre(name=g["name"], slug=g["slug"])
         db.add(genre)
-        genres.append(genre)
     
     db.commit()
     
@@ -32,6 +44,7 @@ def seed_data():
     contents_data = [
         {
             "title": "اینتراستلر",
+            "title_en": "Interstellar",
             "slug": "interstellar",
             "description": "تیمی از کاوش‌گران فضایی برای یافتن خانه‌ای جدید برای بشر، از طریق یک سوراخ کرمی به کاوش می‌پردازند.",
             "type": ContentType.MOVIE,
@@ -43,6 +56,7 @@ def seed_data():
         },
         {
             "title": "اوپنهایمر",
+            "title_en": "Oppenheimer",
             "slug": "oppenheimer",
             "description": "زندگی جی. رابرت اوپنهایمر، فیزیکدان آمریکایی که در توسعه بمب اتمی نقش کلیدی داشت.",
             "type": ContentType.MOVIE,
@@ -54,6 +68,7 @@ def seed_data():
         },
         {
             "title": "بریکینگ بد",
+            "title_en": "Breaking Bad",
             "slug": "breaking-bad",
             "description": "یک معلم شیمی به ساخت مواد مخدر می‌پردازد.",
             "type": ContentType.SERIES,
@@ -65,6 +80,7 @@ def seed_data():
         },
         {
             "title": "حمله تیتان‌ها",
+            "title_en": "Attack on Titan",
             "slug": "attack-on-titan",
             "description": "بشر در برابر تیتان‌های غول‌پیکر برای بقا می‌جنگد.",
             "type": ContentType.ANIME,
@@ -79,6 +95,7 @@ def seed_data():
     for c in contents_data:
         content = Content(
             title=c["title"],
+            title_en=c.get("title_en", ""),
             slug=c["slug"],
             description=c["description"],
             type=c["type"],
@@ -89,7 +106,6 @@ def seed_data():
             language=c["language"],
         )
         
-        # Add genres
         for genre_slug in c["genres"]:
             genre = db.query(Genre).filter(Genre.slug == genre_slug).first()
             if genre:

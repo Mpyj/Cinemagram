@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 
 export default function Navbar() {
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { theme, toggleTheme } = useTheme();
 
@@ -20,79 +21,76 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { href: '#home', label: 'خانه', active: true },
-    { href: '#movies', label: 'فیلم' },
-    { href: '#series', label: 'سریال' },
-    { href: '#anime', label: 'انیمه' },
+    { href: '/', label: 'خانه' },
+    { href: '/search', label: 'جستجو' },
+    { href: '/profile', label: 'پروفایل' },
   ];
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setMobileOpen(false);
+    }
+  };
 
   return (
     <>
-      <nav
-        className={`fixed top-0 inset-x-0 z-50 h-[76px] px-4 md:px-10 flex items-center justify-between border-b transition-all duration-500 ${
-          scrolled
-            ? 'bg-black/95 shadow-lg shadow-black/50 border-white/10'
-            : 'bg-black/75 backdrop-blur-2xl border-white/10'
-        }`}
-      >
-        <a href="#" className="flex items-center gap-2.5">
-          <motion.span
-            className="text-3xl"
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            🎬
-          </motion.span>
-          <span className="text-2xl font-black bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
+      <nav className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-8 lg:px-10 transition-all duration-500 ${
+        scrolled
+          ? 'py-2.5 md:py-3 bg-[var(--bg)]/90 backdrop-blur-xl border-b border-[var(--border)] shadow-lg shadow-black/20'
+          : 'py-4 md:py-5 bg-transparent'
+      }`}>
+        <a href="/" className="flex items-center gap-2 cursor-pointer">
+          <span className="text-2xl md:text-3xl">🎬</span>
+          <span className="text-lg md:text-2xl font-black bg-gradient-to-r from-[#6c5ce7] via-[#a29bfe] to-[#fd79a8] bg-clip-text text-transparent whitespace-nowrap">
             سینماگرام
           </span>
         </a>
 
-        <ul className="hidden md:flex items-center gap-7">
+        <ul className="hidden md:flex items-center gap-4 lg:gap-6">
           {navLinks.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
-                className={`relative text-gray-400 hover:text-white transition-colors duration-300 group ${
-                  link.active ? 'text-white' : ''
-                }`}
+                className="text-sm text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--bg-card)] px-3 py-2 rounded-lg transition-all duration-300"
               >
                 {link.label}
-                <span
-                  className={`absolute bottom-0 right-0 h-0.5 bg-gradient-to-r from-red-400 to-purple-500 transition-all duration-300 ${
-                    link.active ? 'w-full' : 'w-0 group-hover:w-full'
-                  }`}
-                />
               </a>
             </li>
           ))}
         </ul>
 
-        <div className="hidden lg:flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2">
-          <span>🔍</span>
-          <input
-            type="text"
-            placeholder="جستجو فیلم، سریال، انیمه..."
-            className="bg-transparent outline-none text-white w-44 text-sm"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setSearchOpen(true)}
-          />
-        </div>
+        <div className="hidden lg:flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-full px-4 py-2 hover:border-[var(--border-hover)] transition-all">
+            <span className="text-sm">🔍</span>
+            <input
+              type="text"
+              placeholder="جستجو..."
+              className="bg-transparent outline-none text-[var(--text)] text-sm w-28 xl:w-36"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <button
+              onClick={handleSearch}
+              className="bg-gradient-to-r from-[#6c5ce7] to-[#fd79a8] text-white px-3 py-1 rounded-full text-xs font-bold hover:shadow-lg hover:shadow-purple-500/30 active:scale-95 transition-all whitespace-nowrap"
+            >
+              جستجو
+            </button>
+          </div>
 
-        <div className="hidden md:flex items-center gap-3">
           <button
             onClick={toggleTheme}
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xl hover:bg-white/10 transition-all"
+            className="w-9 h-9 rounded-full bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center text-base hover:bg-[var(--bg-card-hover)] hover:rotate-12 active:scale-90 transition-all"
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
 
           <a
             href="/login"
-            className="bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 px-6 py-2.5 rounded-full font-bold text-sm text-white hover:shadow-lg hover:shadow-red-500/50 hover:-translate-y-0.5 transition-all duration-300"
+            className="px-5 py-2 rounded-full bg-gradient-to-r from-[#6c5ce7] via-[#a29bfe] to-[#fd79a8] text-white text-sm font-bold hover:shadow-lg hover:shadow-purple-500/40 hover:-translate-y-0.5 active:scale-95 transition-all whitespace-nowrap"
           >
-            شروع رایگان
+            ورود
           </a>
         </div>
 
@@ -100,21 +98,9 @@ export default function Navbar() {
           className="md:hidden flex flex-col gap-1.5 p-2 z-50"
           onClick={() => setMobileOpen(!mobileOpen)}
         >
-          <span
-            className={`w-6 h-0.5 bg-white transition-all duration-300 ${
-              mobileOpen ? 'rotate-45 translate-y-2' : ''
-            }`}
-          />
-          <span
-            className={`w-6 h-0.5 bg-white transition-all duration-300 ${
-              mobileOpen ? 'opacity-0' : ''
-            }`}
-          />
-          <span
-            className={`w-6 h-0.5 bg-white transition-all duration-300 ${
-              mobileOpen ? '-rotate-45 -translate-y-2' : ''
-            }`}
-          />
+          <span className={`w-6 h-0.5 bg-[var(--text)] transition-all duration-300 ${mobileOpen ? 'rotate-45 translate-y-2' : ''}`} />
+          <span className={`w-6 h-0.5 bg-[var(--text)] transition-all duration-300 ${mobileOpen ? 'opacity-0' : ''}`} />
+          <span className={`w-6 h-0.5 bg-[var(--text)] transition-all duration-300 ${mobileOpen ? '-rotate-45 -translate-y-2' : ''}`} />
         </button>
       </nav>
 
@@ -124,14 +110,14 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 top-[76px] bg-black/95 backdrop-blur-xl z-40 md:hidden flex flex-col items-center gap-8 pt-10"
+            className="fixed inset-0 top-[60px] bg-[var(--bg)]/98 backdrop-blur-xl z-40 md:hidden flex flex-col items-center gap-6 pt-8 px-6"
           >
-            <ul className="flex flex-col items-center gap-6">
+            <ul className="flex flex-col items-center gap-4 w-full">
               {navLinks.map((link) => (
-                <li key={link.href}>
+                <li key={link.href} className="w-full">
                   <a
                     href={link.href}
-                    className="text-2xl font-bold text-white hover:text-red-400 transition-colors"
+                    className="block text-center text-lg font-bold text-[var(--text)] hover:text-[#a29bfe] bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] rounded-xl py-3 px-6 transition-all active:scale-95"
                     onClick={() => setMobileOpen(false)}
                   >
                     {link.label}
@@ -140,19 +126,31 @@ export default function Navbar() {
               ))}
             </ul>
 
-            <button
-              onClick={toggleTheme}
-              className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-2xl"
-            >
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
+            <div className="w-full max-w-[300px]">
+              <input
+                type="text"
+                placeholder="جستجو..."
+                className="w-full px-5 py-3 rounded-full bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text)] text-sm outline-none focus:border-[var(--border-hover)]"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
 
-            <a
-              href="/login"
-              className="bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 px-8 py-3 rounded-full font-bold text-white"
-            >
-              شروع رایگان
-            </a>
+            <div className="flex gap-3">
+              <button
+                onClick={toggleTheme}
+                className="w-11 h-11 rounded-full bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center text-xl active:scale-90 transition-all"
+              >
+                {theme === 'dark' ? '☀️' : '🌙'}
+              </button>
+              <a
+                href="/login"
+                className="px-7 py-2.5 rounded-full bg-gradient-to-r from-[#6c5ce7] via-[#a29bfe] to-[#fd79a8] text-white text-sm font-bold active:scale-95 transition-all"
+              >
+                ورود
+              </a>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

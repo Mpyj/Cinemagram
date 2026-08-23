@@ -27,7 +27,7 @@ class CommentResponse(BaseModel):
     is_approved: bool
     is_hidden: bool
     created_at: datetime
-    replies: List["CommentResponse"] = []
+    replies: Optional[List["CommentResponse"]] = None
     
     class Config:
         from_attributes = True

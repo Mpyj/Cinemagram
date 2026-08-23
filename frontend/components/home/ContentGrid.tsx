@@ -12,22 +12,22 @@ interface ContentGridProps {
 
 export default function ContentGrid({ contents, title, emoji, onCardClick }: ContentGridProps) {
   return (
-    <section className="max-w-7xl mx-auto px-4 py-12">
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl md:text-3xl font-black flex items-center gap-3">
-          <span className="text-3xl animate-bounce">{emoji}</span>
+    <section className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-10">
+      <div className="flex items-center justify-between mb-5 md:mb-6 flex-wrap gap-3">
+        <h2 className="text-xl md:text-2xl font-extrabold flex items-center gap-2 text-[var(--text)]">
+          <span className="text-2xl md:text-3xl">{emoji}</span>
           {title}
         </h2>
-        <span className="text-sm text-gray-500 bg-white/5 border border-white/10 rounded-full px-4 py-2">
+        <span className="text-xs md:text-sm text-[var(--text-muted)] bg-[var(--bg-card)] border border-[var(--border)] rounded-full px-4 py-1.5">
           {contents.length} عنوان
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
         {contents.map((content, index) => (
-          <MovieCard 
-            key={content.id} 
-            content={content} 
+          <MovieCard
+            key={content.id}
+            content={content}
             index={index}
             onClick={onCardClick}
           />

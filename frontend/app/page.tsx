@@ -22,7 +22,13 @@ export default function Home() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const params = activeCategory !== 'all' ? { type: activeCategory } : {};
+        
+        let params: Record<string, string> = {};
+        if (activeCategory !== 'all') {
+          const singular = activeCategory === 'movies' ? 'movie' : activeCategory;
+          params = { type: singular };
+        }
+        
         const data = await getContent(params);
         setContents(data);
         setError('');

@@ -10,29 +10,25 @@ interface MovieCardProps {
 }
 
 export default function MovieCard({ content, index = 0, onClick }: MovieCardProps) {
-  const getGradient = (type: string) => {
+  const getPosterBg = (type: string) => {
     switch (type) {
       case 'movie':
-        return 'linear-gradient(135deg, #ff6b6b, #ff4500)';
+        return 'linear-gradient(135deg, #2d1b5e, #4a1d3a)';
       case 'series':
-        return 'linear-gradient(135deg, #7c3aed, #4f46e5)';
+        return 'linear-gradient(135deg, #0a3d4a, #1b2d5e)';
       case 'anime':
-        return 'linear-gradient(135deg, #06b6d4, #10b981)';
+        return 'linear-gradient(135deg, #3d2d0a, #4a1d3a)';
       default:
-        return 'linear-gradient(135deg, #ff6b6b, #7c3aed)';
+        return 'linear-gradient(135deg, #2d1b5e, #4a1d3a)';
     }
   };
 
   const getEmoji = (type: string) => {
     switch (type) {
-      case 'movie':
-        return '🎬';
-      case 'series':
-        return '📺';
-      case 'anime':
-        return '✨';
-      default:
-        return '🎬';
+      case 'movie': return '🎬';
+      case 'series': return '📺';
+      case 'anime': return '✨';
+      default: return '🎬';
     }
   };
 
@@ -42,43 +38,33 @@ export default function MovieCard({ content, index = 0, onClick }: MovieCardProp
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      whileHover={{ y: -6, scale: 1.02 }}
+      whileHover={{ y: -10, scale: 1.03 }}
+      whileTap={{ scale: 0.93 }}
       onClick={() => onClick?.(content)}
-      className="group relative bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-2xl overflow-hidden cursor-pointer backdrop-blur-lg hover:bg-[var(--bg-card-hover)] hover:border-[var(--border-glass-hover)] transition-all duration-300 hover:shadow-2xl hover:shadow-black/50"
+      className="group bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl overflow-hidden cursor-pointer transition-colors duration-300 hover:bg-[var(--bg-card-hover)] hover:border-[var(--border-hover)] hover:shadow-2xl hover:shadow-black/50"
     >
-      <div className="relative w-full h-[300px] overflow-hidden flex items-center justify-center">
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{ background: getGradient(content.type) }}
-        />
-        <span className="text-7xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
-          {getEmoji(content.type)}
-        </span>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-50 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 w-14 h-14 rounded-full bg-white/20 backdrop-blur-lg border-2 border-white/30 flex items-center justify-center text-xl z-10">
+      <div
+        className="relative h-[160px] sm:h-[180px] md:h-[190px] flex items-center justify-center text-4xl sm:text-5xl md:text-6xl transition-all duration-300 group-hover:brightness-125 group-hover:scale-105"
+        style={{ background: getPosterBg(content.type) }}
+      >
+        {getEmoji(content.type)}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-50 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 w-11 h-11 rounded-full bg-black/50 border-2 border-white/30 flex items-center justify-center text-sm text-white">
           ▶
         </div>
       </div>
 
-      <div className="p-5">
-        <h3 className="text-lg font-bold mb-2 truncate text-[var(--text-primary)] group-hover:text-red-400 transition-colors">
+      <div className="p-3.5 md:p-4">
+        <h3 className="text-sm font-bold mb-1 truncate text-[var(--text)]">
           {content.title}
         </h3>
-        <div className="flex gap-3 text-xs text-[var(--text-muted)] mb-3 flex-wrap">
-          <span>📅 {content.release_year || 'نامشخص'}</span>
-          <span>
-            ⏱️ {content.type === 'movie' ? '۱۳۰ دقیقه' : content.type === 'series' ? '۸ فصل' : '۲۴ قسمت'}
-          </span>
+        <div className="text-[#fdcb6e] font-bold text-xs">
+          ⭐ {content.rating || 'N/A'}
         </div>
-        <div className="flex items-center gap-2 mb-3">
-          <span className="font-bold text-yellow-500">{content.rating || 'N/A'}</span>
-          <span className="text-yellow-500 text-sm">★★★★★</span>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          {content.genres?.map((genre) => (
+        <div className="flex gap-1.5 flex-wrap mt-2">
+          {content.genres?.slice(0, 2).map((genre) => (
             <span
               key={genre.id}
-              className="px-3 py-1 rounded-full text-xs bg-[var(--bg-card)] border border-[var(--border-glass)] text-[var(--text-secondary)] group-hover:bg-[var(--bg-card-hover)] group-hover:text-[var(--text-primary)] transition-colors"
+              className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-muted)]"
             >
               {genre.name}
             </span>
