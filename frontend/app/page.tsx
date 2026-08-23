@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Hero from '@/components/home/Hero';
 import CategoryTabs from '@/components/home/CategoryTabs';
 import ContentGrid from '@/components/home/ContentGrid';
-import ContentModal from '@/components/content/ContentModal';
 import Footer from '@/components/layout/Footer';
 import BackToTop from '@/components/ui/BackToTop';
 import { Content } from '@/lib/types';
@@ -77,8 +77,8 @@ const sampleAnime: Content[] = [
 ];
 
 export default function Home() {
+  const router = useRouter();
   const [activeCategory, setActiveCategory] = useState('movies');
-  const [selectedContent, setSelectedContent] = useState<Content | null>(null);
 
   const getFilteredContent = () => {
     switch (activeCategory) {
@@ -112,6 +112,10 @@ export default function Home() {
 
   const { title, emoji } = getTitle();
 
+  const handleCardClick = (content: Content) => {
+    router.push(`/content/${content.slug}`);
+  };
+
   return (
     <>
       <Navbar />
@@ -122,12 +126,11 @@ export default function Home() {
           contents={getFilteredContent()} 
           title={title} 
           emoji={emoji}
-          onCardClick={setSelectedContent}
+          onCardClick={handleCardClick}
         />
       </main>
       <Footer />
       <BackToTop />
-      <ContentModal content={selectedContent} onClose={() => setSelectedContent(null)} />
     </>
   );
 }

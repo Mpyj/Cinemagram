@@ -22,9 +22,14 @@ api.interceptors.request.use((config) => {
 });
 
 // ===== Content APIs =====
-export const getContent = async (params?: any) => {
+export const getContent = async (params?: Record<string, string | number | undefined>) => {
   const response = await api.get('/content', { params });
   return response.data as Content[];
+};
+
+export const getContentBySlug = async (slug: string) => {
+  const response = await api.get(`/content/slug/${slug}`);
+  return response.data as Content;
 };
 
 export const getContentById = async (id: number) => {

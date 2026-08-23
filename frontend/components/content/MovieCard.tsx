@@ -44,7 +44,7 @@ export default function MovieCard({ content, index = 0, onClick }: MovieCardProp
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover={{ y: -6, scale: 1.02 }}
       onClick={() => onClick?.(content)}
-      className="group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden cursor-pointer backdrop-blur-lg hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-black/50"
+      className="group relative bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-2xl overflow-hidden cursor-pointer backdrop-blur-lg hover:bg-[var(--bg-card-hover)] hover:border-[var(--border-glass-hover)] transition-all duration-300 hover:shadow-2xl hover:shadow-black/50"
     >
       <div className="relative w-full h-[300px] overflow-hidden flex items-center justify-center">
         <div
@@ -61,10 +61,10 @@ export default function MovieCard({ content, index = 0, onClick }: MovieCardProp
       </div>
 
       <div className="p-5">
-        <h3 className="text-lg font-bold mb-2 truncate group-hover:text-red-400 transition-colors">
+        <h3 className="text-lg font-bold mb-2 truncate text-[var(--text-primary)] group-hover:text-red-400 transition-colors">
           {content.title}
         </h3>
-        <div className="flex gap-3 text-xs text-gray-500 mb-3 flex-wrap">
+        <div className="flex gap-3 text-xs text-[var(--text-muted)] mb-3 flex-wrap">
           <span>📅 {content.release_year || 'نامشخص'}</span>
           <span>
             ⏱️ {content.type === 'movie' ? '۱۳۰ دقیقه' : content.type === 'series' ? '۸ فصل' : '۲۴ قسمت'}
@@ -78,7 +78,7 @@ export default function MovieCard({ content, index = 0, onClick }: MovieCardProp
           {content.genres?.map((genre) => (
             <span
               key={genre.id}
-              className="px-3 py-1 rounded-full text-xs bg-white/5 border border-white/10 text-gray-400 group-hover:bg-white/10 group-hover:text-white transition-colors"
+              className="px-3 py-1 rounded-full text-xs bg-[var(--bg-card)] border border-[var(--border-glass)] text-[var(--text-secondary)] group-hover:bg-[var(--bg-card-hover)] group-hover:text-[var(--text-primary)] transition-colors"
             >
               {genre.name}
             </span>

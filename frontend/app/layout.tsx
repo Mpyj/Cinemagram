@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { AuthProvider } from "@/context/AuthProvider";
 
 export const metadata: Metadata = {
   title: "سینماگرام | پیشنهاد فیلم، سریال و انیمه",
@@ -23,7 +24,9 @@ export default function RootLayout({
     <html lang="fa" dir="rtl" className="dark">
       <body className="antialiased">
         <ThemeProvider>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
