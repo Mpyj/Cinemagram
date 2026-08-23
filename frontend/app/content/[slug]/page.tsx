@@ -5,97 +5,72 @@ import { useParams } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import BackToTop from '@/components/ui/BackToTop';
-import { Content } from '@/lib/types';
-
-const sampleData: Record<string, Content> = {
-  'interstellar': {
-    id: 1,
-    title: 'اینتراستلر',
-    slug: 'interstellar',
-    description: 'تیمی از کاوش‌گران فضایی برای یافتن خانه‌ای جدید برای بشر، از طریق یک سوراخ کرمی به کاوش می‌پردازند.',
-    type: 'movie',
-    status: 'published',
-    release_year: 2014,
-    rating: 8.6,
-    country: 'USA',
-    language: 'English',
-    views_count: 1200,
-    genres: [
-      { id: 1, name: 'علمی-تخیلی', slug: 'sci-fi' },
-      { id: 2, name: 'ماجراجویی', slug: 'adventure' },
-    ],
-    created_at: '2024-01-01',
-  },
-  'oppenheimer': {
-    id: 2,
-    title: 'اوپنهایمر',
-    slug: 'oppenheimer',
-    description: 'زندگی جی. رابرت اوپنهایمر، فیزیکدان آمریکایی که در توسعه بمب اتمی نقش کلیدی داشت.',
-    type: 'movie',
-    status: 'published',
-    release_year: 2023,
-    rating: 8.3,
-    country: 'USA',
-    language: 'English',
-    views_count: 980,
-    genres: [
-      { id: 3, name: 'درام', slug: 'drama' },
-    ],
-    created_at: '2024-01-02',
-  },
-  'breaking-bad': {
-    id: 3,
-    title: 'بریکینگ بد',
-    slug: 'breaking-bad',
-    description: 'یک معلم شیمی به ساخت مواد مخدر می‌پردازد.',
-    type: 'series',
-    status: 'published',
-    release_year: 2008,
-    rating: 9.5,
-    country: 'USA',
-    language: 'English',
-    views_count: 2500,
-    genres: [
-      { id: 5, name: 'جرایم', slug: 'crime' },
-    ],
-    created_at: '2024-01-03',
-  },
-  'attack-on-titan': {
-    id: 4,
-    title: 'حمله تیتان‌ها',
-    slug: 'attack-on-titan',
-    description: 'بشر در برابر تیتان‌های غول‌پیکر برای بقا می‌جنگد.',
-    type: 'anime',
-    status: 'published',
-    release_year: 2013,
-    rating: 9.0,
-    country: 'Japan',
-    language: 'Japanese',
-    views_count: 3000,
-    genres: [
-      { id: 6, name: 'اکشن', slug: 'action' },
-    ],
-    created_at: '2024-01-04',
-  },
-};
+import { Content, Comment } from '@/lib/types';
+import { getContentBySlug, getComments, addComment, addToWatchlist } from '@/lib/api';
 
 export default function ContentDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
 
   const [content, setContent] = useState<Content | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [watchlistAdded, setWatchlistAdded] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (slug && sampleData[slug]) {
-        setContent(sampleData[slug]);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const data = await getContentBySlug(slug);
+        setContent(data);
+        
+        const commentData = await getComments(data.id);
+        setComments(commentData);
+        
+        setError('');
+      } catch (err) {
+        setError('خطا در دریافت اطلاعات');
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }, 0);
+    };
 
-    return () => clearTimeout(timer);
+    if (slug) {
+      fetchData();
+    }
   }, [slug]);
+
+  const handleAddComment = async () => {
+    if (!newComment.trim() || !content) return;
+
+    try {
+      const comment = await addComment({
+        content_id: content.id,
+        body: newComment.trim(),
+      });
+      setComments([comment, ...comments]);
+      setNewComment('');
+    } catch (err) {
+      console.error(err);
+      alert('خطا در ثبت نظر');
+    }
+  };
+
+  const handleWatchlist = async () => {
+    if (!content) return;
+
+    try {
+      await addToWatchlist(content.id);
+      setWatchlistAdded(true);
+      alert('به علاقه‌مندی‌ها اضافه شد!');
+    } catch (err) {
+      console.error(err);
+      alert('خطا در افزودن به علاقه‌مندی‌ها');
+    }
+  };
 
   const getGradient = (type: string) => {
     switch (type) {
@@ -135,12 +110,12 @@ export default function ContentDetailPage() {
     );
   }
 
-  if (!content) {
+  if (error || !content) {
     return (
       <>
         <Navbar />
         <main className="bg-[var(--bg-primary)] min-h-screen pt-[76px] flex items-center justify-center">
-          <div className="text-xl text-red-400">محتوا یافت نشد</div>
+          <div className="text-xl text-red-400">{error || 'محتوا یافت نشد'}</div>
         </main>
         <Footer />
       </>
@@ -200,15 +175,80 @@ export default function ContentDetailPage() {
               {content.description || 'توضیحاتی ثبت نشده است.'}
             </p>
 
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-3 flex-wrap mb-8">
               <button className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 text-white font-bold hover:shadow-lg hover:shadow-red-500/50 hover:-translate-y-0.5 transition-all">
                 <span>▶</span>
                 تماشا
               </button>
-              <button className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--bg-card)] border border-[var(--border-glass)] text-[var(--text-primary)] font-bold hover:bg-[var(--bg-card-hover)] hover:-translate-y-0.5 transition-all">
-                <span>❤️</span>
-                افزودن به علاقه‌مندی‌ها
+              <button
+                onClick={handleWatchlist}
+                disabled={watchlistAdded}
+                className={`inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all ${
+                  watchlistAdded
+                    ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                    : 'bg-[var(--bg-card)] border border-[var(--border-glass)] text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] hover:-translate-y-0.5'
+                }`}
+              >
+                <span>{watchlistAdded ? '✅' : '❤️'}</span>
+                {watchlistAdded ? 'اضافه شد' : 'افزودن به علاقه‌مندی‌ها'}
               </button>
+            </div>
+
+            {/* بخش کامنت‌ها */}
+            <div className="border-t border-[var(--border-glass)] pt-6">
+              <h2 className="text-xl font-black mb-4 text-[var(--text-primary)]">
+                💬 نظرات ({comments.length})
+              </h2>
+
+              {/* فرم کامنت */}
+              <div className="mb-6">
+                <textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="نظر خود را بنویسید..."
+                  className="w-full px-4 py-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-glass)] text-[var(--text-primary)] outline-none focus:border-purple-500 transition-colors min-h-[100px] resize-y"
+                />
+                <button
+                  onClick={handleAddComment}
+                  disabled={!newComment.trim()}
+                  className="mt-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 text-white font-bold hover:shadow-lg hover:shadow-red-500/30 transition-all disabled:opacity-50"
+                >
+                  ثبت نظر
+                </button>
+              </div>
+
+              {/* لیست کامنت‌ها */}
+              <div className="space-y-4">
+                {comments.length === 0 && (
+                  <div className="text-center text-[var(--text-muted)] py-6">
+                    اولین نفری باشید که نظر می‌دهید!
+                  </div>
+                )}
+
+                {comments.map((comment) => (
+                  <div
+                    key={comment.id}
+                    className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-glass)]"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-400 to-cyan-500 flex items-center justify-center text-lg">
+                        👤
+                      </div>
+                      <div>
+                        <div className="font-bold text-sm text-[var(--text-primary)]">
+                          کاربر {comment.user_id}
+                        </div>
+                        <div className="text-xs text-[var(--text-muted)]">
+                          {new Date(comment.created_at).toLocaleDateString('fa-IR')}
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      {comment.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

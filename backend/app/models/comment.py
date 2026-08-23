@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, Text, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from ..core.database import Base
@@ -10,7 +10,7 @@ class Comment(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     content_id = Column(Integer, ForeignKey('contents.id', ondelete='CASCADE'), nullable=False, index=True)
-    parent_id = Column(Integer, ForeignKey('comments.id', ondelete='CASCADE'), nullable=True)  # برای ریپلای
+    parent_id = Column(Integer, ForeignKey('comments.id', ondelete='CASCADE'), nullable=True)
     
     body = Column(Text, nullable=False)
     
@@ -23,4 +23,4 @@ class Comment(Base):
     # Relationships
     user = relationship("User", back_populates="comments")
     content = relationship("Content", back_populates="comments")
-    replies = relationship("Comment", backref="parent", remote_side=[id], cascade="all, delete-orphan")
+    replies = relationship("Comment", backref="parent", remote_side=[id])

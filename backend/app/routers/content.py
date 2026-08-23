@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import or_, and_
+from sqlalchemy import or_
 from typing import List, Optional
 from ..core.database import get_db
 from ..models import Content, Genre, ContentType, ContentStatus, Episode
@@ -21,28 +21,21 @@ async def get_all_content(
     sort: Optional[str] = Query("created_at", pattern="^(created_at|rating|views_count|release_year)$"),
     db: Session = Depends(get_db)
 ):
-    """
-    Get all content with filters and search
-    """
+    """Get all content with filters and search"""
     query = db.query(Content).options(joinedload(Content.genres))
     
-    # Filter by type
     if type:
         query = query.filter(Content.type == ContentType(type))
     
-    # Filter by genre
     if genre:
         query = query.join(Content.genres).filter(Genre.slug == genre)
     
-    # Filter by year
     if year:
         query = query.filter(Content.release_year == year)
     
-    # Filter by rating
     if min_rating:
         query = query.filter(Content.rating >= min_rating)
     
-    # Search
     if search:
         search_term = f"%{search}%"
         query = query.filter(
@@ -53,7 +46,6 @@ async def get_all_content(
             )
         )
     
-    # Sort
     if sort == "rating":
         query = query.order_by(Content.rating.desc())
     elif sort == "views_count":
@@ -63,8 +55,23 @@ async def get_all_content(
     else:
         query = query.order_by(Content.created_at.desc())
     
-    total = query.count()
     content = query.offset(skip).limit(limit).all()
+    return content
+
+
+@router.get("/slug/{slug}", response_model=ContentResponse)
+async def get_content_by_slug(slug: str, db: Session = Depends(get_db)):
+    """Get content by slug"""
+    content = db.query(Content).options(joinedload(Content.genres)).filter(Content.slug == slug).first()
+    if not content:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Content not found"
+        )
+    
+    content.views_count += 1
+    db.commit()
+    db.refresh(content)
     
     return content
 
@@ -79,7 +86,6 @@ async def get_content(content_id: int, db: Session = Depends(get_db)):
             detail="Content not found"
         )
     
-    # Increment views
     content.views_count += 1
     db.commit()
     db.refresh(content)
@@ -107,7 +113,6 @@ async def get_content_episodes(content_id: int, db: Session = Depends(get_db)):
 @router.post("/", response_model=ContentResponse, status_code=status.HTTP_201_CREATED)
 async def create_content(content: ContentCreate, db: Session = Depends(get_db)):
     """Create new content"""
-    # Check slug uniqueness
     existing = db.query(Content).filter(Content.slug == content.slug).first()
     if existing:
         raise HTTPException(
@@ -115,7 +120,6 @@ async def create_content(content: ContentCreate, db: Session = Depends(get_db)):
             detail="Content with this slug already exists"
         )
     
-    # Create content
     new_content = Content(
         title=content.title,
         title_en=content.title_en,
@@ -134,7 +138,6 @@ async def create_content(content: ContentCreate, db: Session = Depends(get_db)):
         download_url=content.download_url
     )
     
-    # Add genres
     if content.genre_ids:
         genres = db.query(Genre).filter(Genre.id.in_(content.genre_ids)).all()
         new_content.genres = genres
@@ -155,7 +158,6 @@ async def update_content(content_id: int, content_update: ContentUpdate, db: Ses
             detail="Content not found"
         )
     
-    # Update fields
     for field, value in content_update.model_dump(exclude_unset=True).items():
         if field == "genre_ids":
             genres = db.query(Genre).filter(Genre.id.in_(value)).all()
