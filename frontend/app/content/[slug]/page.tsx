@@ -28,22 +28,16 @@ export default function ContentDetailPage() {
         setLoading(true);
         const data = await getContentBySlug(slug);
         setContent(data);
-        
         const commentData = await getComments(data.id);
         setComments(commentData);
-        
         setError('');
       } catch (err) {
         setError('خطا در دریافت اطلاعات');
-        console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
-    if (slug) {
-      fetchData();
-    }
+    if (slug) fetchData();
   }, [slug]);
 
   const handleAddComment = async () => {
@@ -51,7 +45,6 @@ export default function ContentDetailPage() {
       router.push('/login');
       return;
     }
-
     if (!newComment.trim() || !content) return;
 
     try {
@@ -62,7 +55,6 @@ export default function ContentDetailPage() {
       setComments([comment, ...comments]);
       setNewComment('');
     } catch (err) {
-      console.error(err);
       alert('خطا در ثبت نظر');
     }
   };
@@ -72,7 +64,6 @@ export default function ContentDetailPage() {
       router.push('/login');
       return;
     }
-
     if (!content) return;
 
     try {
@@ -80,7 +71,6 @@ export default function ContentDetailPage() {
       setWatchlistAdded(true);
       alert('به علاقه‌مندی‌ها اضافه شد!');
     } catch (err) {
-      console.error(err);
       alert('خطا در افزودن به علاقه‌مندی‌ها');
     }
   };
@@ -90,33 +80,24 @@ export default function ContentDetailPage() {
       router.push('/login');
       return;
     }
-    // اینجا می‌تونی لینک تماشا رو باز کنی
     alert('لینک تماشا');
   };
 
   const getGradient = (type: string) => {
     switch (type) {
-      case 'movie':
-        return 'linear-gradient(135deg, #ff6b6b, #ff4500)';
-      case 'series':
-        return 'linear-gradient(135deg, #7c3aed, #4f46e5)';
-      case 'anime':
-        return 'linear-gradient(135deg, #06b6d4, #10b981)';
-      default:
-        return 'linear-gradient(135deg, #ff6b6b, #7c3aed)';
+      case 'movie': return 'linear-gradient(135deg, #2d1b5e, #4a1d3a)';
+      case 'series': return 'linear-gradient(135deg, #0a3d4a, #1b2d5e)';
+      case 'anime': return 'linear-gradient(135deg, #3d2d0a, #4a1d3a)';
+      default: return 'linear-gradient(135deg, #2d1b5e, #4a1d3a)';
     }
   };
 
   const getEmoji = (type: string) => {
     switch (type) {
-      case 'movie':
-        return '🎬';
-      case 'series':
-        return '📺';
-      case 'anime':
-        return '✨';
-      default:
-        return '🎬';
+      case 'movie': return '🚀';
+      case 'series': return '🧪';
+      case 'anime': return '🛡️';
+      default: return '🎬';
     }
   };
 
@@ -124,9 +105,9 @@ export default function ContentDetailPage() {
     return (
       <>
         <Navbar />
-        <main className="bg-[var(--bg-primary)] min-h-screen pt-[76px] flex items-center justify-center">
-          <div className="text-2xl text-[var(--text-muted)]">در حال بارگذاری...</div>
-        </main>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+          در حال بارگذاری...
+        </div>
         <Footer />
       </>
     );
@@ -136,9 +117,9 @@ export default function ContentDetailPage() {
     return (
       <>
         <Navbar />
-        <main className="bg-[var(--bg-primary)] min-h-screen pt-[76px] flex items-center justify-center">
-          <div className="text-xl text-red-400">{error || 'محتوا یافت نشد'}</div>
-        </main>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
+          {error || 'محتوا یافت نشد'}
+        </div>
         <Footer />
       </>
     );
@@ -147,22 +128,23 @@ export default function ContentDetailPage() {
   return (
     <>
       <Navbar />
-      <main className="bg-[var(--bg-primary)] min-h-screen pt-[76px]">
-        <div
-          className="relative h-[300px] md:h-[400px] flex items-center justify-center"
-          style={{ background: getGradient(content.type) }}
-        >
-          <span className="text-[100px] md:text-[140px]">{getEmoji(content.type)}</span>
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] to-transparent" />
-        </div>
+      <main>
+        <div className="detail-container">
+          <div className="hero-bg"></div>
 
-        <div className="max-w-5xl mx-auto px-4 -mt-32 relative z-10">
-          <div className="bg-[var(--bg-secondary)] border border-[var(--border-glass)] rounded-3xl p-6 md:p-10">
-            <h1 className="text-3xl md:text-4xl font-black mb-4 text-[var(--text-primary)]">
-              {content.title}
-            </h1>
+          {/* بنر */}
+          <div
+            className="detail-banner"
+            style={{ background: getGradient(content.type) }}
+          >
+            {getEmoji(content.type)}
+          </div>
 
-            <div className="flex gap-4 text-sm text-[var(--text-secondary)] mb-4 flex-wrap">
+          {/* کارت اطلاعات */}
+          <div className="detail-card">
+            <h1 className="detail-title">{content.title}</h1>
+
+            <div className="detail-meta">
               <span>📅 {content.release_year || 'نامشخص'}</span>
               <span>🎭 {content.genres?.map(g => g.name).join('، ') || 'نامشخص'}</span>
               <span>
@@ -171,115 +153,85 @@ export default function ContentDetailPage() {
               {content.country && <span>🌍 {content.country}</span>}
             </div>
 
-            <div className="flex items-center gap-3 mb-6">
-              <span className="text-3xl font-black text-yellow-500">{content.rating || 'N/A'}</span>
-              <span className="text-yellow-500 text-xl">
+            <div className="detail-rating">
+              <span className="value">{content.rating || 'N/A'}</span>
+              <span className="stars">
                 {'★'.repeat(Math.round((content.rating || 0) / 2))}
                 {'☆'.repeat(5 - Math.round((content.rating || 0) / 2))}
               </span>
-              <span className="text-sm text-[var(--text-muted)]">
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 {content.views_count.toLocaleString('fa-IR')} بازدید
               </span>
             </div>
 
-            <div className="flex gap-2 flex-wrap mb-6">
-              {content.genres?.map((genre) => (
-                <span
-                  key={genre.id}
-                  className="px-4 py-1.5 rounded-full text-sm bg-[var(--bg-card)] border border-[var(--border-glass)] text-[var(--text-secondary)]"
-                >
-                  {genre.name}
-                </span>
-              ))}
-            </div>
-
-            <p className="text-[var(--text-secondary)] leading-relaxed mb-8">
+            <p className="detail-description">
               {content.description || 'توضیحاتی ثبت نشده است.'}
             </p>
 
-            <div className="flex gap-3 flex-wrap mb-8">
-              <button
-                onClick={handleWatch}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 text-white font-bold hover:shadow-lg hover:shadow-red-500/50 hover:-translate-y-0.5 transition-all"
-              >
-                <span>▶</span>
-                تماشا
+            <div className="detail-actions">
+              <button className="btn-primary" onClick={handleWatch} style={{ padding: '10px 24px', fontSize: '0.85rem' }}>
+                ▶ تماشا
               </button>
               <button
+                className="btn-secondary"
                 onClick={handleWatchlist}
                 disabled={watchlistAdded}
-                className={`inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all ${
-                  watchlistAdded
-                    ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                    : 'bg-[var(--bg-card)] border border-[var(--border-glass)] text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] hover:-translate-y-0.5'
-                }`}
+                style={{
+                  padding: '10px 24px',
+                  fontSize: '0.85rem',
+                  ...(watchlistAdded ? { borderColor: 'rgba(16,185,129,0.5)', color: '#10b981' } : {}),
+                }}
               >
-                <span>{watchlistAdded ? '✅' : '❤️'}</span>
-                {watchlistAdded ? 'اضافه شد' : 'افزودن به علاقه‌مندی‌ها'}
+                {watchlistAdded ? '✅ اضافه شد' : '❤️ افزودن به علاقه‌مندی‌ها'}
               </button>
             </div>
 
             {/* بخش کامنت‌ها */}
-            <div className="border-t border-[var(--border-glass)] pt-6">
-              <h2 className="text-xl font-black mb-4 text-[var(--text-primary)]">
-                💬 نظرات ({comments.length})
-              </h2>
+            <div className="comments-section">
+              <h2 className="comments-title">💬 نظرات ({comments.length})</h2>
 
-              {/* فرم کامنت */}
-              <div className="mb-6">
+              <div className="comment-form">
                 {!isLoggedIn && (
-                  <div className="text-sm text-[var(--text-muted)] mb-3">
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
                     برای ثبت نظر باید{' '}
-                    <a href="/login" className="text-purple-400 hover:underline">
-                      وارد شوید
-                    </a>
+                    <a href="/login" style={{ color: 'var(--secondary)' }}>وارد شوید</a>
                   </div>
                 )}
                 <textarea
+                  className="comment-textarea"
+                  placeholder={isLoggedIn ? 'نظر خود را بنویسید...' : 'برای ثبت نظر وارد شوید...'}
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  placeholder={isLoggedIn ? "نظر خود را بنویسید..." : "برای ثبت نظر وارد شوید..."}
-                  className="w-full px-4 py-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-glass)] text-[var(--text-primary)] outline-none focus:border-purple-500 transition-colors min-h-[100px] resize-y"
                   disabled={!isLoggedIn}
                 />
                 <button
+                  className="btn-primary"
                   onClick={handleAddComment}
                   disabled={!newComment.trim() || !isLoggedIn}
-                  className="mt-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 text-white font-bold hover:shadow-lg hover:shadow-red-500/30 transition-all disabled:opacity-50"
+                  style={{ marginTop: '10px', padding: '10px 24px', fontSize: '0.85rem', opacity: (!newComment.trim() || !isLoggedIn) ? 0.5 : 1 }}
                 >
                   {isLoggedIn ? 'ثبت نظر' : 'ورود و ثبت نظر'}
                 </button>
               </div>
 
-              {/* لیست کامنت‌ها */}
-              <div className="space-y-4">
+              <div className="comment-list">
                 {comments.length === 0 && (
-                  <div className="text-center text-[var(--text-muted)] py-6">
+                  <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px 0' }}>
                     اولین نفری باشید که نظر می‌دهید!
                   </div>
                 )}
-
                 {comments.map((comment) => (
-                  <div
-                    key={comment.id}
-                    className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-glass)]"
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-400 to-cyan-500 flex items-center justify-center text-lg">
-                        👤
-                      </div>
+                  <div key={comment.id} className="comment-item">
+                    <div className="comment-header">
+                      <div className="comment-avatar">👤</div>
                       <div>
-                        <div className="font-bold text-sm text-[var(--text-primary)]">
-                          کاربر {comment.user_id}
-                        </div>
-                        <div className="text-xs text-[var(--text-muted)]">
+                        <div className="comment-user">کاربر {comment.user_id}</div>
+                        <div className="comment-date">
                           {new Date(comment.created_at).toLocaleDateString('fa-IR')}
                         </div>
                       </div>
                     </div>
-                    <p className="text-sm text-[var(--text-secondary)]">
-                      {comment.body}
-                    </p>
+                    <p className="comment-body">{comment.body}</p>
                   </div>
                 ))}
               </div>

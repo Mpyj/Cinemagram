@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import BackToTop from '@/components/ui/BackToTop';
 import ContentGrid from '@/components/home/ContentGrid';
 import { Content } from '@/lib/types';
 import { getContent } from '@/lib/api';
@@ -27,7 +28,6 @@ export default function SearchPage() {
 
   const handleSearch = async (searchTerm?: string) => {
     const term = (searchTerm || query).trim();
-    
     if (!term || term.length < 2) {
       alert('حداقل ۲ حرف وارد کنید');
       return;
@@ -41,8 +41,7 @@ export default function SearchPage() {
       const data = await getContent({ search: term });
       setResults(data);
     } catch (err) {
-      console.error('Search error:', err);
-      setError('خطا در جستجو');
+      setError('خطا در جستجو. مطمئن شوید بک‌اند روشن است.');
       setResults([]);
     } finally {
       setLoading(false);
@@ -56,58 +55,68 @@ export default function SearchPage() {
   return (
     <>
       <Navbar />
-      <main className="bg-[var(--bg-primary)] min-h-screen pt-[76px]">
-        <div className="max-w-4xl mx-auto px-4 py-10">
-          <h1 className="text-3xl font-black mb-6 text-[var(--text-primary)]">جستجو</h1>
-          
-          <div className="mb-8">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="جستجو فیلم، سریال، انیمه..."
-                className="flex-1 px-6 py-4 rounded-full bg-[var(--bg-card)] border border-[var(--border-glass)] text-[var(--text-primary)] outline-none focus:border-purple-500 transition-colors"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleSearch();
-                  }
-                }}
-              />
-              <button
-                onClick={() => handleSearch()}
-                disabled={loading}
-                className="px-8 py-4 rounded-full bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 text-white font-bold hover:shadow-lg hover:shadow-red-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
-              >
-                {loading ? '...' : '🔍 جستجو'}
-              </button>
-            </div>
-          </div>
+      <main>
+        <div className="hero-bg"></div>
 
-          {error && (
-            <div className="text-center py-4 text-red-400">{error}</div>
-          )}
-
-          {loading && (
-            <div className="text-center py-10 text-[var(--text-muted)]">در حال جستجو...</div>
-          )}
-
-          {!loading && searched && !error && results.length === 0 && (
-            <div className="text-center py-10 text-[var(--text-muted)]">نتیجه‌ای یافت نشد</div>
-          )}
-
-          {!loading && results.length > 0 && (
-            <ContentGrid 
-              contents={results} 
-              title={`نتایج جستجو (${results.length})`} 
-              emoji="🔍"
-              onCardClick={handleCardClick}
-            />
-          )}
+        {/* هدر صفحه */}
+        <div className="page-header">
+          <h1 className="page-title">جستجو در سینماگرام</h1>
+          <p className="page-subtitle">فیلم، سریال یا انیمه مورد علاقه‌ات رو پیدا کن</p>
         </div>
+
+        {/* باکس جستجو */}
+        <div className="section" style={{ maxWidth: '600px', margin: '0 auto', paddingTop: '10px' }}>
+          <div className="search-box" style={{ width: '100%', padding: '12px 20px', borderRadius: '50px' }}>
+            <span style={{ fontSize: '18px' }}>🔍</span>
+            <input
+              type="text"
+              placeholder="جستجو فیلم، سریال، انیمه..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              style={{ flex: 1, fontSize: '0.95rem' }}
+              autoFocus
+            />
+            <button
+              onClick={() => handleSearch()}
+              disabled={loading}
+              style={{ padding: '8px 20px', fontSize: '0.85rem' }}
+            >
+              {loading ? '...' : 'جستجو'}
+            </button>
+          </div>
+        </div>
+
+        {/* نتایج */}
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+            در حال جستجو...
+          </div>
+        )}
+
+        {error && (
+          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--accent)' }}>
+            {error}
+          </div>
+        )}
+
+        {!loading && searched && !error && results.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+            نتیجه‌ای یافت نشد
+          </div>
+        )}
+
+        {!loading && results.length > 0 && (
+          <ContentGrid
+            contents={results}
+            title={`نتایج جستجو (${results.length})`}
+            emoji="🔍"
+            onCardClick={handleCardClick}
+          />
+        )}
       </main>
       <Footer />
+      <BackToTop />
     </>
   );
 }
