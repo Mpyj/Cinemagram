@@ -169,6 +169,15 @@ export default function ProfilePage() {
     }
   };
 
+  const getContentEmoji = (type: string) => {
+    switch (type) {
+      case 'movie': return '🎬';
+      case 'series': return '📺';
+      case 'anime': return '✨';
+      default: return '🎬';
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -306,9 +315,31 @@ export default function ProfilePage() {
               )}
               {watchlist.map((content) => (
                 <div key={content.id} className="admin-item">
-                  <span style={{ fontSize: '28px' }}>
-                    {content.type === 'movie' ? '🎬' : content.type === 'series' ? '📺' : '✨'}
+                  <span
+                    style={{
+                      width: '50px',
+                      height: '50px',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      fontSize: '22px',
+                      background: 'var(--bg-card)',
+                    }}
+                  >
+                    {content.poster_url ? (
+                      <img
+                        src={content.poster_url}
+                        alt={content.title}
+                        style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      getContentEmoji(content.type)
+                    )}
                   </span>
+                  
                   <div
                     style={{ flex: 1, cursor: 'pointer' }}
                     onClick={() => router.push(`/content/${content.slug}`)}
@@ -352,15 +383,28 @@ export default function ProfilePage() {
               {myComments.map((comment) => (
                 <div key={comment.id} className="comment-item">
                   <div className="comment-header">
-                    <div className="comment-avatar" style={{ overflow: 'hidden' }}>
-                      {userData?.avatar_url ? (
+                    {/* نمایش پوستر محتوا */}
+                    <div
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '50%',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        background: 'var(--bg-card)',
+                      }}
+                    >
+                      {comment.content_poster_url ? (
                         <img
-                          src={userData.avatar_url}
-                          alt={userData.username || 'کاربر'}
-                          style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
+                          src={comment.content_poster_url}
+                          alt={comment.content_title || 'پوستر'}
+                          style={{ width: '38px', height: '38px', objectFit: 'cover' }}
                         />
                       ) : (
-                        '💬'
+                        <span style={{ fontSize: '18px' }}>🎬</span>
                       )}
                     </div>
                     <div style={{ flex: 1 }}>

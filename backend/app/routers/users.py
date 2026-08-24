@@ -31,7 +31,7 @@ async def get_my_comments(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Get current user comments with content title"""
+    """Get current user comments with content title and poster"""
     comments = db.query(Comment).filter(
         Comment.user_id == current_user.id
     ).order_by(Comment.created_at.desc()).all()
@@ -52,6 +52,7 @@ async def get_my_comments(
             "username": user.username if user else f"کاربر {c.user_id}",
             "avatar_url": user.avatar_url if user and user.avatar_url else None,
             "content_title": content.title if content else f"محتوای #{c.content_id}",
+            "content_poster_url": content.poster_url if content else None,
             "replies": None
         })
     
