@@ -419,7 +419,17 @@ export default function AdminPage() {
                 
                 return (
                   <div key={user.id} className="admin-item">
-                    <span style={{ fontSize: '28px' }}>👤</span>
+                    <span style={{ fontSize: '28px', width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {user.avatar_url ? (
+                        <img
+                          src={user.avatar_url}
+                          alt={user.username}
+                          style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        '👤'
+                      )}
+                    </span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         {user.username}
@@ -494,23 +504,30 @@ export default function AdminPage() {
               )}
               {comments.map((comment) => (
                 <div key={comment.id} className="admin-item">
-                  <span style={{ fontSize: '24px', width: '38px', height: '38px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {/* عکس پروفایل کاربر */}
+                  <span style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {comment.avatar_url ? (
                       <img
                         src={comment.avatar_url}
                         alt={comment.username || 'کاربر'}
-                        style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
+                        style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                       />
                     ) : (
-                      '💬'
+                      <span style={{ fontSize: '22px' }}>👤</span>
                     )}
                   </span>
+                  
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '0.85rem' }}>{comment.body}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                      {comment.username || `کاربر ${comment.user_id}`} • {new Date(comment.created_at).toLocaleDateString('fa-IR')}
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                      <span style={{ fontWeight: 700, color: 'var(--text)' }}>
+                        {comment.username || `کاربر ${comment.user_id}`}
+                      </span>
+                      {' '}•{' '}
+                      {new Date(comment.created_at).toLocaleDateString('fa-IR')}
                     </div>
                   </div>
+                  
                   {!comment.is_approved && (
                     <button
                       className="btn-secondary"
@@ -547,7 +564,17 @@ export default function AdminPage() {
               </h2>
               {users.map((user) => (
                 <div key={user.id} className="admin-item">
-                  <span style={{ fontSize: '28px' }}>👤</span>
+                  <span style={{ fontSize: '28px', width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {user.avatar_url ? (
+                      <img
+                        src={user.avatar_url}
+                        alt={user.username}
+                        style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      '👤'
+                    )}
+                  </span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{user.username}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>

@@ -11,15 +11,12 @@ router = APIRouter(prefix="/admin", tags=["Admin"])
 
 
 def is_superior(user: User, target: User) -> bool:
-    """Check if user can manage target"""
     if user.role == UserRole.OWNER:
         return user.id != target.id
     elif user.role == UserRole.ADMIN:
         return target.role == UserRole.USER
     return False
 
-
-# ===== User Management =====
 
 @router.get("/users", response_model=List[UserResponse])
 async def get_all_users(
@@ -50,29 +47,17 @@ async def change_user_role(
 ):
     """Change user role (owner only)"""
     if current_user.role != UserRole.OWNER:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only owner can change roles"
-        )
+        raise HTTPException(status_code=403, detail="Only owner can change roles")
     
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+        raise HTTPException(status_code=404, detail="User not found")
     
     if user.id == current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You cannot change your own role"
-        )
+        raise HTTPException(status_code=400, detail="You cannot change your own role")
     
     if new_role not in ["admin", "user"]:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid role. Only admin or user allowed."
-        )
+        raise HTTPException(status_code=400, detail="Invalid role")
     
     user.role = UserRole(new_role)
     db.commit()
@@ -167,8 +152,6 @@ async def unmute_user(
     return {"message": "User unmuted"}
 
 
-# ===== Comment Management =====
-
 @router.get("/comments")
 async def get_all_comments(
     skip: int = Query(0, ge=0),
@@ -176,7 +159,7 @@ async def get_all_comments(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin)
 ):
-    """Get all comments with username (admin only)"""
+    """Get all comments with username and avatar (admin only)"""
     comments = db.query(Comment).order_by(Comment.created_at.desc()).offset(skip).limit(limit).all()
     
     result = []
@@ -192,6 +175,7 @@ async def get_all_comments(
             "is_hidden": c.is_hidden,
             "created_at": c.created_at,
             "username": user.username if user else f"کاربر {c.user_id}",
+            "avatar_url": user.avatar_url if user and user.avatar_url else None,
             "replies": None
         })
     
@@ -247,8 +231,6 @@ async def delete_comment(
     return None
 
 
-# ===== Content Management =====
-
 @router.get("/content", response_model=List[ContentResponse])
 async def get_all_content_admin(
     skip: int = Query(0, ge=0),
@@ -259,31 +241,3 @@ async def get_all_content_admin(
     """Get all content (admin only)"""
     query = db.query(Content)
     return query.order_by(Content.created_at.desc()).offset(skip).limit(limit).all()
-@router.get("/comments")
-async def get_all_comments(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(50, ge=1, le=100),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin)
-):
-    """Get all comments with username and avatar (admin only)"""
-    comments = db.query(Comment).order_by(Comment.created_at.desc()).offset(skip).limit(limit).all()
-    
-    result = []
-    for c in comments:
-        user = db.query(User).filter(User.id == c.user_id).first()
-        result.append({
-            "id": c.id,
-            "user_id": c.user_id,
-            "content_id": c.content_id,
-            "parent_id": c.parent_id,
-            "body": c.body,
-            "is_approved": c.is_approved,
-            "is_hidden": c.is_hidden,
-            "created_at": c.created_at,
-            "username": user.username if user else f"کاربر {c.user_id}",
-            "avatar_url": user.avatar_url if user and user.avatar_url else None,
-            "replies": None
-        })
-    
-    return result
