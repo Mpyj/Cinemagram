@@ -19,8 +19,16 @@ export default function CategoryTabs({ activeCategory, onCategoryChange }: Categ
         {categories.map((cat) => (
           <button
             key={cat.id}
+            type="button"
             className={`tab ${activeCategory === cat.id ? 'active' : ''}`}
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => onCategoryChange(cat.id)}
+            style={{
+              cursor: 'pointer',
+              userSelect: 'none',
+              WebkitTapHighlightColor: 'transparent',
+              outline: 'none',
+            }}
           >
             {cat.emoji} {cat.label}
           </button>

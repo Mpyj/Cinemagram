@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Hero from '@/components/home/Hero';
 import CategoryTabs from '@/components/home/CategoryTabs';
@@ -13,19 +13,13 @@ import { getContent } from '@/lib/api';
 
 export default function Home() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const catParam = searchParams.get('cat');
-
-  const [activeCategory, setActiveCategory] = useState(catParam || 'movies');
+  const [activeCategory, setActiveCategory] = useState('movies');
   const [contents, setContents] = useState<Content[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (catParam) {
-      setActiveCategory(catParam);
-    }
-  }, [catParam]);
+  
+  // برای حفظ موقعیت اسکرول
+  const scrollPositionRef = useRef(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,6 +41,19 @@ export default function Home() {
     };
     fetchData();
   }, [activeCategory]);
+
+  // بعد از اینکه محتوا لود شد و loading تمام شد، اسکرول رو برمیگردونیم
+  useLayoutEffect(() => {
+    if (!loading) {
+      window.scrollTo(0, scrollPositionRef.current);
+    }
+  }, [loading]);
+
+  const handleCategoryChange = (category: string) => {
+    // موقعیت فعلی اسکرول رو ذخیره کن
+    scrollPositionRef.current = window.scrollY;
+    setActiveCategory(category);
+  };
 
   const handleCardClick = (content: Content) => {
     router.push(`/content/${content.slug}`);
@@ -90,11 +97,29 @@ export default function Home() {
         </div>
 
         <section id="content">
-          <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
-          {loading && <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>در حال بارگذاری...</div>}
-          {error && <div style={{ textAlign: 'center', padding: '40px', color: 'red' }}>{error}</div>}
+          <CategoryTabs activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
+          {loading && (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+              در حال بارگذاری...
+            </div>
+          )}
+          {error && (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'red' }}>
+              {error}
+            </div>
+          )}
           {!loading && !error && contents.length > 0 && (
-            <ContentGrid contents={contents} title={title} emoji={emoji} onCardClick={handleCardClick} />
+            <ContentGrid
+              contents={contents}
+              title={title}
+              emoji={emoji}
+              onCardClick={handleCardClick}
+            />
+          )}
+          {!loading && !error && contents.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+              محتوایی یافت نشد
+            </div>
           )}
         </section>
       </main>
