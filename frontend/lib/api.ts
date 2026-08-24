@@ -10,7 +10,6 @@ const api = axios.create({
   },
 });
 
-// Add token to requests
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('access_token');
@@ -21,7 +20,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Check token expiration on response
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -36,7 +34,6 @@ api.interceptors.response.use(
   }
 );
 
-// ===== Content APIs =====
 export const getContent = async (params?: Record<string, string | number | undefined>) => {
   const response = await api.get('/content', { params });
   return response.data as Content[];
@@ -53,17 +50,17 @@ export const getContentById = async (id: number) => {
 };
 
 export const getEpisodes = async (contentId: number) => {
-  const response = await api.get(`/content/${contentId}/episodes`);
+  const response = await api.get('/episodes', {
+    params: { content_id: contentId },
+  });
   return response.data as Episode[];
 };
 
-// ===== Genre APIs =====
 export const getGenres = async () => {
   const response = await api.get('/genres');
   return response.data as Genre[];
 };
 
-// ===== Comment APIs =====
 export const getComments = async (contentId: number) => {
   const response = await api.get(`/comments/content/${contentId}`);
   return response.data as Comment[];
@@ -74,7 +71,6 @@ export const addComment = async (comment: { content_id: number; body: string; pa
   return response.data as Comment;
 };
 
-// ===== Auth APIs =====
 export const login = async (data: LoginRequest) => {
   const response = await api.post('/auth/login', data);
   return response.data as TokenResponse;
@@ -85,7 +81,6 @@ export const register = async (data: RegisterRequest) => {
   return response.data as User;
 };
 
-// ===== User APIs =====
 export const getMyProfile = async () => {
   const response = await api.get('/users/me');
   return response.data as User;
@@ -107,7 +102,6 @@ export const uploadAvatar = async (file: File) => {
   return response.data;
 };
 
-// ===== Watchlist APIs =====
 export const getWatchlist = async () => {
   const response = await api.get('/watchlist');
   return response.data as Content[];

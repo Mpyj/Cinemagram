@@ -54,12 +54,12 @@ export interface Episode {
   content_id: number;
   season_number: number;
   episode_number: number;
-  title?: string;
-  description?: string;
-  video_url?: string;
-  download_url?: string;
-  thumbnail_url?: string;
-  duration_minutes?: number;
+  title?: string | null;
+  description?: string | null;
+  video_url?: string | null;
+  download_url?: string | null;
+  thumbnail_url?: string | null;
+  duration_minutes?: number | null;
 }
 
 // ===== Comment Types =====
@@ -76,6 +76,7 @@ export interface Comment {
   username?: string | null;
   avatar_url?: string | null;
   content_title?: string | null;
+  content_poster_url?: string | null;
   replies?: Comment[] | null;
 }
 

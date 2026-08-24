@@ -194,7 +194,7 @@ async def update_content(
         )
     
     for field, value in content_update.model_dump(exclude_unset=True).items():
-        if field == "genre_ids":
+        if field == "genre_ids" and value is not None:
             genres = db.query(Genre).filter(Genre.id.in_(value)).all()
             content.genres = genres
         elif field == "type" and value:

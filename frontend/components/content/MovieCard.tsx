@@ -41,11 +41,7 @@ export default function MovieCard({ content, index = 0, onClick }: MovieCardProp
           <img
             src={content.poster_url}
             alt={content.title}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
           getEmoji(content.type)
@@ -60,17 +56,8 @@ export default function MovieCard({ content, index = 0, onClick }: MovieCardProp
             <span key={genre.id} className="tag">{genre.name}</span>
           ))}
           {remainingGenres > 0 && (
-            <span 
-              className="tag" 
-              style={{ 
-                background: 'rgba(162, 155, 254, 0.15)', 
-                borderColor: 'rgba(162, 155, 254, 0.4)',
-                color: '#a29bfe',
-                cursor: 'pointer',
-              }}
-              title={`${content.genres?.slice(2).map(g => g.name).join('، ')}`}
-            >
-              +{remainingGenres} ژانر دیگر
+            <span className="tag" style={{ background: 'rgba(162, 155, 254, 0.15)', borderColor: 'rgba(162, 155, 254, 0.4)', color: '#a29bfe' }}>
+              +{remainingGenres}
             </span>
           )}
         </div>

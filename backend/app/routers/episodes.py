@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from ..core.database import get_db
-from ..models import Episode, Content
+from ..core.permissions import require_admin
+from ..models import Episode, Content, User
 from ..schemas import EpisodeCreate, EpisodeUpdate, EpisodeResponse
 
 router = APIRouter(prefix="/episodes", tags=["Episodes"])
@@ -17,20 +18,19 @@ async def get_episodes(
     query = db.query(Episode)
     if content_id:
         query = query.filter(Episode.content_id == content_id)
-    
     return query.order_by(Episode.season_number, Episode.episode_number).all()
 
 
 @router.post("/", response_model=EpisodeResponse, status_code=status.HTTP_201_CREATED)
-async def create_episode(episode: EpisodeCreate, db: Session = Depends(get_db)):
-    """Create a new episode"""
-    # Check content exists
+async def create_episode(
+    episode: EpisodeCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """Create a new episode (admin only)"""
     content = db.query(Content).filter(Content.id == episode.content_id).first()
     if not content:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Content not found"
-        )
+        raise HTTPException(status_code=404, detail="Content not found")
     
     new_episode = Episode(
         content_id=episode.content_id,
@@ -51,14 +51,16 @@ async def create_episode(episode: EpisodeCreate, db: Session = Depends(get_db)):
 
 
 @router.put("/{episode_id}", response_model=EpisodeResponse)
-async def update_episode(episode_id: int, episode_update: EpisodeUpdate, db: Session = Depends(get_db)):
-    """Update an episode"""
+async def update_episode(
+    episode_id: int,
+    episode_update: EpisodeUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """Update an episode (admin only)"""
     episode = db.query(Episode).filter(Episode.id == episode_id).first()
     if not episode:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Episode not found"
-        )
+        raise HTTPException(status_code=404, detail="Episode not found")
     
     for field, value in episode_update.model_dump(exclude_unset=True).items():
         if value is not None:
@@ -70,14 +72,15 @@ async def update_episode(episode_id: int, episode_update: EpisodeUpdate, db: Ses
 
 
 @router.delete("/{episode_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_episode(episode_id: int, db: Session = Depends(get_db)):
-    """Delete an episode"""
+async def delete_episode(
+    episode_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """Delete an episode (admin only)"""
     episode = db.query(Episode).filter(Episode.id == episode_id).first()
     if not episode:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Episode not found"
-        )
+        raise HTTPException(status_code=404, detail="Episode not found")
     
     db.delete(episode)
     db.commit()
