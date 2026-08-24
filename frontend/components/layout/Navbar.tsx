@@ -25,16 +25,13 @@ export default function Navbar() {
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     setIsLoggedIn(!!token);
-
     const user = localStorage.getItem('user');
     if (user) {
       try {
         const parsed = JSON.parse(user);
         setUserRole(parsed.role || '');
         setUsername(parsed.username || '');
-      } catch {
-        // ignore
-      }
+      } catch {}
     }
   }, []);
 
@@ -49,16 +46,11 @@ export default function Navbar() {
     setMobileOpen(false);
   };
 
-  const handleSearchClick = () => {
-    router.push('/search');
-    setMobileOpen(false);
-  };
-
   const isAdmin = userRole === 'admin' || userRole === 'owner';
 
   return (
     <>
-      <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} id="navbar">
+      <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
         <a className="logo" onClick={() => router.push('/')} style={{ cursor: 'pointer' }}>
           <span className="logo-icon">🎬</span>
           سینماگرام
@@ -73,88 +65,7 @@ export default function Navbar() {
         </ul>
 
         <div className="nav-actions">
-          <div className="search-box" onClick={handleSearchClick} style={{ cursor: 'pointer' }}>
-            <span>🔍</span>
-            <input
-              type="text"
-              placeholder="جستجو..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleSearch();
-                }
-              }}
-              onClick={(e) => e.stopPropagation()}
-              style={{ cursor: 'text' }}
-            />
-            <button onClick={(e) => {
-              e.stopPropagation();
-              handleSearch();
-            }}>
-              جستجو
-            </button>
-          </div>
-
-          <button className="theme-toggle" onClick={toggleTheme}>
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
-
-          {isLoggedIn ? (
-            <a href="/profile" className="btn-login">
-              👤 {username || 'پروفایل'}
-            </a>
-          ) : (
-            <a href="/login" className="btn-login">ورود</a>
-          )}
-        </div>
-
-        <button
-          className="mobile-hamburger"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          style={{
-            display: 'none',
-            flexDirection: 'column',
-            gap: '5px',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            zIndex: 50,
-          }}
-        >
-          <span style={{ width: '24px', height: '2px', background: 'var(--text)', transition: 'all 0.3s' }} />
-          <span style={{ width: '24px', height: '2px', background: 'var(--text)', transition: 'all 0.3s' }} />
-          <span style={{ width: '24px', height: '2px', background: 'var(--text)', transition: 'all 0.3s' }} />
-        </button>
-      </nav>
-
-      {mobileOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '60px',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'var(--bg)',
-            zIndex: 999,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '20px',
-            paddingTop: '40px',
-          }}
-        >
-          <a href="/" className="btn-secondary" style={{ width: '80%', justifyContent: 'center' }} onClick={() => setMobileOpen(false)}>خانه</a>
-          <a href="/?cat=movies" className="btn-secondary" style={{ width: '80%', justifyContent: 'center' }} onClick={() => setMobileOpen(false)}>فیلم‌ها</a>
-          <a href="/?cat=series" className="btn-secondary" style={{ width: '80%', justifyContent: 'center' }} onClick={() => setMobileOpen(false)}>سریال‌ها</a>
-          <a href="/?cat=anime" className="btn-secondary" style={{ width: '80%', justifyContent: 'center' }} onClick={() => setMobileOpen(false)}>انیمه‌ها</a>
-          {isAdmin && (
-            <a href="/admin" className="btn-secondary" style={{ width: '80%', justifyContent: 'center' }} onClick={() => setMobileOpen(false)}>مدیریت</a>
-          )}
-          
-          <div className="search-box" style={{ width: '80%' }} onClick={handleSearchClick}>
+          <div className="search-box" onClick={() => router.push('/search')} style={{ cursor: 'pointer' }}>
             <span>🔍</span>
             <input
               type="text"
@@ -162,33 +73,38 @@ export default function Navbar() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              style={{ flex: 1, cursor: 'text' }}
               onClick={(e) => e.stopPropagation()}
             />
-            <button onClick={(e) => {
-              e.stopPropagation();
-              handleSearch();
-            }}>جستجو</button>
+            <button onClick={(e) => { e.stopPropagation(); handleSearch(); }}>جستجو</button>
           </div>
 
+          <button className="theme-toggle" onClick={toggleTheme}>
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+
           {isLoggedIn ? (
-            <a href="/profile" className="btn-login" onClick={() => setMobileOpen(false)}>
-              👤 {username || 'پروفایل'}
-            </a>
+            <a href="/profile" className="btn-login">👤 {username || 'پروفایل'}</a>
           ) : (
-            <a href="/login" className="btn-login" onClick={() => setMobileOpen(false)}>ورود</a>
+            <a href="/login" className="btn-login">ورود</a>
           )}
         </div>
-      )}
 
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .mobile-hamburger { display: flex !important; }
-          .nav-links, .nav-actions .search-box, .nav-actions .theme-toggle, .nav-actions .btn-login {
-            display: none !important;
-          }
-        }
-      `}</style>
+        <button className="hamburger" onClick={() => setMobileOpen(!mobileOpen)}>
+          <span style={{ transform: mobileOpen ? 'rotate(45deg) translateY(6px)' : 'none' }} />
+          <span style={{ opacity: mobileOpen ? 0 : 1 }} />
+          <span style={{ transform: mobileOpen ? 'rotate(-45deg) translateY(-6px)' : 'none' }} />
+        </button>
+      </nav>
+
+      {mobileOpen && (
+        <div className="mobile-menu">
+          <a href="/" onClick={() => setMobileOpen(false)}>🏠 خانه</a>
+          <a href="/?cat=movies" onClick={() => setMobileOpen(false)}>🎬 فیلم‌ها</a>
+          <a href="/?cat=series" onClick={() => setMobileOpen(false)}>📺 سریال‌ها</a>
+          <a href="/?cat=anime" onClick={() => setMobileOpen(false)}>✨ انیمه‌ها</a>
+          {isAdmin && <a href="/admin" onClick={() => setMobileOpen(false)}>👑 مدیریت</a>}
+        </div>
+      )}
     </>
   );
 }
