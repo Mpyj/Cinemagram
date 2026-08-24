@@ -27,6 +27,9 @@ export default function MovieCard({ content, index = 0, onClick }: MovieCardProp
     }
   };
 
+  const visibleGenres = content.genres?.slice(0, 2) || [];
+  const remainingGenres = content.genres && content.genres.length > 2 ? content.genres.length - 2 : 0;
+
   return (
     <div
       className="card"
@@ -53,9 +56,23 @@ export default function MovieCard({ content, index = 0, onClick }: MovieCardProp
         <div className="card-title">{content.title}</div>
         <div className="card-rating">⭐ {content.rating || 'N/A'}</div>
         <div className="card-tags">
-          {content.genres?.slice(0, 2).map((genre) => (
+          {visibleGenres.map((genre) => (
             <span key={genre.id} className="tag">{genre.name}</span>
           ))}
+          {remainingGenres > 0 && (
+            <span 
+              className="tag" 
+              style={{ 
+                background: 'rgba(162, 155, 254, 0.15)', 
+                borderColor: 'rgba(162, 155, 254, 0.4)',
+                color: '#a29bfe',
+                cursor: 'pointer',
+              }}
+              title={`${content.genres?.slice(2).map(g => g.name).join('، ')}`}
+            >
+              +{remainingGenres} ژانر دیگر
+            </span>
+          )}
         </div>
       </div>
     </div>
