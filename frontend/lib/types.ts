@@ -74,6 +74,8 @@ export interface Comment {
   is_hidden: boolean;
   created_at: string;
   username?: string | null;
+  avatar_url?: string | null;
+  content_title?: string | null;
   replies?: Comment[] | null;
 }
 
@@ -105,26 +107,4 @@ export interface WatchlistItem {
   status: 'watching' | 'completed' | 'plan_to_watch' | 'dropped';
   added_at: string;
   content?: Content;
-}
-
-// ===== API Response Types =====
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  limit: number;
-}
-export interface Comment {
-  id: number;
-  user_id: number;
-  content_id: number;
-  parent_id?: number | null;
-  body: string;
-  is_approved: boolean;
-  is_hidden: boolean;
-  created_at: string;
-  username?: string | null;
-  avatar_url?: string | null;
-  replies?: Comment[] | null;
 }

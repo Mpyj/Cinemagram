@@ -364,8 +364,8 @@ export default function ProfilePage() {
                       )}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div className="comment-user">
-                        روی محتوای #{comment.content_id}
+                      <div className="comment-user" style={{ fontWeight: 700, color: 'var(--text)' }}>
+                        🎬 {comment.content_title || `محتوای #${comment.content_id}`}
                       </div>
                       <div className="comment-date">
                         {new Date(comment.created_at).toLocaleDateString('fa-IR')}
