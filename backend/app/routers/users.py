@@ -163,3 +163,31 @@ async def change_password(
     db.commit()
     
     return {"message": "Password changed successfully"}
+@router.get("/me/comments")
+async def get_my_comments(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get current user comments"""
+    comments = db.query(Comment).filter(
+        Comment.user_id == current_user.id
+    ).order_by(Comment.created_at.desc()).all()
+    
+    result = []
+    for c in comments:
+        user = db.query(User).filter(User.id == c.user_id).first()
+        result.append({
+            "id": c.id,
+            "user_id": c.user_id,
+            "content_id": c.content_id,
+            "parent_id": c.parent_id,
+            "body": c.body,
+            "is_approved": c.is_approved,
+            "is_hidden": c.is_hidden,
+            "created_at": c.created_at,
+            "username": user.username if user else f"کاربر {c.user_id}",
+            "avatar_url": user.avatar_url if user and user.avatar_url else None,
+            "replies": None
+        })
+    
+    return result

@@ -259,3 +259,31 @@ async def get_all_content_admin(
     """Get all content (admin only)"""
     query = db.query(Content)
     return query.order_by(Content.created_at.desc()).offset(skip).limit(limit).all()
+@router.get("/comments")
+async def get_all_comments(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=100),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """Get all comments with username and avatar (admin only)"""
+    comments = db.query(Comment).order_by(Comment.created_at.desc()).offset(skip).limit(limit).all()
+    
+    result = []
+    for c in comments:
+        user = db.query(User).filter(User.id == c.user_id).first()
+        result.append({
+            "id": c.id,
+            "user_id": c.user_id,
+            "content_id": c.content_id,
+            "parent_id": c.parent_id,
+            "body": c.body,
+            "is_approved": c.is_approved,
+            "is_hidden": c.is_hidden,
+            "created_at": c.created_at,
+            "username": user.username if user else f"کاربر {c.user_id}",
+            "avatar_url": user.avatar_url if user and user.avatar_url else None,
+            "replies": None
+        })
+    
+    return result

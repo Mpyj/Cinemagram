@@ -220,7 +220,22 @@ export default function ContentDetailPage() {
                 {comments.map((comment) => (
                   <div key={comment.id} className="comment-item">
                     <div className="comment-header">
-                      <div className="comment-avatar">👤</div>
+                      <div className="comment-avatar" style={{ overflow: 'hidden' }}>
+                        {comment.avatar_url ? (
+                          <img
+                            src={comment.avatar_url}
+                            alt={comment.username || 'کاربر'}
+                            style={{
+                              width: '38px',
+                              height: '38px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                            }}
+                          />
+                        ) : (
+                          '👤'
+                        )}
+                      </div>
                       <div>
                         <div className="comment-user">
                           {comment.username || `کاربر ${comment.user_id}`}

@@ -115,3 +115,16 @@ export interface PaginatedResponse<T> {
   page: number;
   limit: number;
 }
+export interface Comment {
+  id: number;
+  user_id: number;
+  content_id: number;
+  parent_id?: number | null;
+  body: string;
+  is_approved: boolean;
+  is_hidden: boolean;
+  created_at: string;
+  username?: string | null;
+  avatar_url?: string | null;
+  replies?: Comment[] | null;
+}

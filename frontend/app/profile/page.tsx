@@ -43,7 +43,6 @@ export default function ProfilePage() {
     if (savedUser) {
       try {
         const parsed = JSON.parse(savedUser);
-        console.log('Logged in user:', parsed);
         setUserData(parsed);
       } catch {
         fetchProfile();
@@ -54,12 +53,8 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'watchlist') {
-      fetchWatchlist();
-    }
-    if (activeTab === 'comments') {
-      fetchMyComments();
-    }
+    if (activeTab === 'watchlist') fetchWatchlist();
+    if (activeTab === 'comments') fetchMyComments();
   }, [activeTab]);
 
   const fetchProfile = async () => {
@@ -78,7 +73,6 @@ export default function ProfilePage() {
       const data = await getWatchlist();
       setWatchlist(data);
     } catch (err) {
-      console.error('Error fetching watchlist:', err);
       setWatchlist([]);
     } finally {
       setLoadingWatchlist(false);
@@ -88,18 +82,10 @@ export default function ProfilePage() {
   const fetchMyComments = async () => {
     setLoadingComments(true);
     try {
-      console.log('=== Fetching my comments ===');
       const response = await api.get('/users/me/comments');
-      console.log('Response status:', response.status);
-      console.log('Response data:', response.data);
       setMyComments(response.data);
-    } catch (err: any) {
-      console.error('=== Error fetching comments ===');
-      console.error('Message:', err.message);
-      if (err.response) {
-        console.error('Status:', err.response.status);
-        console.error('Data:', err.response.data);
-      }
+    } catch (err) {
+      console.error('Error fetching comments:', err);
       setMyComments([]);
     } finally {
       setLoadingComments(false);
@@ -113,7 +99,6 @@ export default function ProfilePage() {
       alert('از علاقه‌مندی‌ها حذف شد!');
       fetchWatchlist();
     } catch (err) {
-      console.error('Remove watchlist error:', err);
       alert('خطا در حذف از علاقه‌مندی‌ها');
     }
   };
@@ -127,7 +112,6 @@ export default function ProfilePage() {
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setAvatarFile(file);
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -138,7 +122,6 @@ export default function ProfilePage() {
 
   const handleAvatarSubmit = async () => {
     if (!avatarFile) return;
-
     setUploading(true);
     try {
       const result = await uploadAvatar(avatarFile);
@@ -155,7 +138,6 @@ export default function ProfilePage() {
         alert('عکس پروفایل آپدیت شد!');
       }
     } catch (err) {
-      console.error('Upload error:', err);
       alert('خطا در آپلود عکس');
     } finally {
       setUploading(false);
@@ -370,7 +352,17 @@ export default function ProfilePage() {
               {myComments.map((comment) => (
                 <div key={comment.id} className="comment-item">
                   <div className="comment-header">
-                    <div className="comment-avatar">💬</div>
+                    <div className="comment-avatar" style={{ overflow: 'hidden' }}>
+                      {userData?.avatar_url ? (
+                        <img
+                          src={userData.avatar_url}
+                          alt={userData.username || 'کاربر'}
+                          style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        '💬'
+                      )}
+                    </div>
                     <div style={{ flex: 1 }}>
                       <div className="comment-user">
                         روی محتوای #{comment.content_id}

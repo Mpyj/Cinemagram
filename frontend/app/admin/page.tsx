@@ -46,8 +46,7 @@ export default function AdminPage() {
         } else {
           router.push('/');
         }
-      } catch (err) {
-        console.error('Error parsing user:', err);
+      } catch {
         router.push('/');
       }
     } else {
@@ -95,35 +94,28 @@ export default function AdminPage() {
       });
       
       alert('✅ محتوا اضافه شد!');
-      
       setNewContentTitle('');
       setNewContentSlug('');
       setNewContentYear('');
       setNewContentRating('');
       setNewContentDescription('');
       setNewContentType('movie');
-      
       fetchAllData();
     } catch (err: any) {
       console.error('Add content error:', err);
-      if (err.response?.data?.detail) {
-        alert(`خطا: ${err.response.data.detail}`);
-      } else {
-        alert('خطا در افزودن محتوا');
-      }
+      alert('خطا در افزودن محتوا');
     } finally {
       setAddingContent(false);
     }
   };
 
   const handleDeleteContent = async (contentId: number) => {
-    if (!confirm('مطمئن هستید؟ این محتوا حذف می‌شود!')) return;
+    if (!confirm('مطمئن هستید؟')) return;
     try {
       await api.delete(`/content/${contentId}`);
       alert('محتوا حذف شد!');
       fetchAllData();
     } catch (err) {
-      console.error('Delete content error:', err);
       alert('خطا در حذف محتوا');
     }
   };
@@ -134,7 +126,6 @@ export default function AdminPage() {
       alert('کاربر بن شد!');
       fetchAllData();
     } catch (err) {
-      console.error('Ban error:', err);
       alert('خطا در بن کردن کاربر');
     }
   };
@@ -206,7 +197,6 @@ export default function AdminPage() {
       alert('کاربر به ادمین ارتقا یافت!');
       fetchAllData();
     } catch (err) {
-      console.error('Promote error:', err);
       alert('خطا در ارتقای کاربر');
     }
   };
@@ -217,7 +207,6 @@ export default function AdminPage() {
       alert('کاربر به کاربر عادی تنزل یافت!');
       fetchAllData();
     } catch (err) {
-      console.error('Demote error:', err);
       alert('خطا در تنزل کاربر');
     }
   };
@@ -505,7 +494,17 @@ export default function AdminPage() {
               )}
               {comments.map((comment) => (
                 <div key={comment.id} className="admin-item">
-                  <span style={{ fontSize: '24px' }}>💬</span>
+                  <span style={{ fontSize: '24px', width: '38px', height: '38px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {comment.avatar_url ? (
+                      <img
+                        src={comment.avatar_url}
+                        alt={comment.username || 'کاربر'}
+                        style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      '💬'
+                    )}
+                  </span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '0.85rem' }}>{comment.body}</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
@@ -546,11 +545,6 @@ export default function AdminPage() {
               <h2 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '20px' }}>
                 👑 مدیریت نقش‌ها
               </h2>
-              {users.length === 0 && (
-                <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>
-                  کاربری یافت نشد
-                </div>
-              )}
               {users.map((user) => (
                 <div key={user.id} className="admin-item">
                   <span style={{ fontSize: '28px' }}>👤</span>

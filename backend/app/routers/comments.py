@@ -32,6 +32,7 @@ async def get_content_comments(content_id: int, db: Session = Depends(get_db)):
             "is_hidden": c.is_hidden,
             "created_at": c.created_at,
             "username": user.username if user else f"کاربر {c.user_id}",
+            "avatar_url": user.avatar_url if user and user.avatar_url else None,
             "replies": None
         })
     
@@ -73,6 +74,7 @@ async def create_comment(
         "is_hidden": new_comment.is_hidden,
         "created_at": new_comment.created_at,
         "username": current_user.username,
+        "avatar_url": current_user.avatar_url if current_user.avatar_url else None,
         "replies": None
     }
 
