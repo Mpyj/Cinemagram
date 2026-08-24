@@ -9,6 +9,15 @@ interface MovieCardProps {
 }
 
 export default function MovieCard({ content, index = 0, onClick }: MovieCardProps) {
+  const getPosterBg = (type: string) => {
+    switch (type) {
+      case 'movie': return 'linear-gradient(135deg, #2d1b5e, #4a1d3a)';
+      case 'series': return 'linear-gradient(135deg, #0a3d4a, #1b2d5e)';
+      case 'anime': return 'linear-gradient(135deg, #3d2d0a, #4a1d3a)';
+      default: return 'linear-gradient(135deg, #2d1b5e, #4a1d3a)';
+    }
+  };
+
   const getEmoji = (type: string) => {
     switch (type) {
       case 'movie': return '🚀';
@@ -25,7 +34,19 @@ export default function MovieCard({ content, index = 0, onClick }: MovieCardProp
       style={{ animationDelay: `${index * 0.1}s` }}
     >
       <div className={`card-poster ${content.type}`}>
-        {getEmoji(content.type)}
+        {content.poster_url ? (
+          <img
+            src={content.poster_url}
+            alt={content.title}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+        ) : (
+          getEmoji(content.type)
+        )}
         <div className="play-btn">▶</div>
       </div>
       <div className="card-info">

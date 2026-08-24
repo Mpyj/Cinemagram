@@ -136,7 +136,19 @@ export default function ContentDetailPage() {
             className="detail-banner"
             style={{ background: getGradient(content.type) }}
           >
-            {getEmoji(content.type)}
+            {content.poster_url ? (
+              <img
+                src={content.poster_url}
+                alt={content.title}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            ) : (
+              getEmoji(content.type)
+            )}
           </div>
 
           <div className="detail-card">
@@ -225,12 +237,7 @@ export default function ContentDetailPage() {
                           <img
                             src={comment.avatar_url}
                             alt={comment.username || 'کاربر'}
-                            style={{
-                              width: '38px',
-                              height: '38px',
-                              borderRadius: '50%',
-                              objectFit: 'cover',
-                            }}
+                            style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
                           />
                         ) : (
                           '👤'

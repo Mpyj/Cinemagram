@@ -25,6 +25,7 @@ export default function AdminPage() {
   const [newContentRating, setNewContentRating] = useState('');
   const [newContentDescription, setNewContentDescription] = useState('');
   const [addingContent, setAddingContent] = useState(false);
+  const [uploadingPoster, setUploadingPoster] = useState<number | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -117,6 +118,26 @@ export default function AdminPage() {
       fetchAllData();
     } catch (err) {
       alert('خطا در حذف محتوا');
+    }
+  };
+
+  const handleUploadPoster = async (contentId: number, file: File) => {
+    setUploadingPoster(contentId);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await api.post(`/content/${contentId}/poster`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      alert('✅ پوستر آپلود شد!');
+      fetchAllData();
+    } catch (err) {
+      console.error('Upload poster error:', err);
+      alert('خطا در آپلود پوستر');
+    } finally {
+      setUploadingPoster(null);
     }
   };
 
@@ -382,21 +403,72 @@ export default function AdminPage() {
                   محتوایی یافت نشد
                 </div>
               )}
+              
               {contents.map((content) => (
                 <div key={content.id} className="admin-item">
-                  <span style={{ fontSize: '28px' }}>
-                    {content.type === 'movie' ? '🎬' : content.type === 'series' ? '📺' : '✨'}
+                  {/* نمایش پوستر */}
+                  <span
+                    style={{
+                      width: '50px',
+                      height: '50px',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      fontSize: '24px',
+                      background: 'var(--bg-card)',
+                    }}
+                  >
+                    {content.poster_url ? (
+                      <img
+                        src={content.poster_url}
+                        alt={content.title}
+                        style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      content.type === 'movie' ? '🎬' : content.type === 'series' ? '📺' : '✨'
+                    )}
                   </span>
+                  
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{content.title}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                       {content.slug} • {content.release_year || 'نامشخص'} • ⭐ {content.rating || 'N/A'}
                     </div>
                   </div>
+                  
+                  {/* دکمه آپلود پوستر */}
+                  <label
+                    className="btn-secondary"
+                    style={{
+                      padding: '6px 12px',
+                      fontSize: '0.7rem',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    {uploadingPoster === content.id ? '⏳...' : '📷 عکس'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadPoster(content.id, file);
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                  
                   <button
                     className="btn-secondary"
                     onClick={() => handleDeleteContent(content.id)}
-                    style={{ padding: '6px 14px', fontSize: '0.75rem', color: '#fd79a8', borderColor: 'rgba(253,121,168,0.3)', whiteSpace: 'nowrap' }}
+                    style={{ padding: '6px 12px', fontSize: '0.7rem', color: '#fd79a8', borderColor: 'rgba(253,121,168,0.3)', whiteSpace: 'nowrap' }}
                   >
                     🗑 حذف
                   </button>
@@ -419,7 +491,7 @@ export default function AdminPage() {
                 
                 return (
                   <div key={user.id} className="admin-item">
-                    <span style={{ fontSize: '28px', width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       {user.avatar_url ? (
                         <img
                           src={user.avatar_url}
@@ -427,7 +499,7 @@ export default function AdminPage() {
                           style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                         />
                       ) : (
-                        '👤'
+                        <span style={{ fontSize: '20px' }}>👤</span>
                       )}
                     </span>
                     <div style={{ flex: 1 }}>
@@ -504,7 +576,6 @@ export default function AdminPage() {
               )}
               {comments.map((comment) => (
                 <div key={comment.id} className="admin-item">
-                  {/* عکس پروفایل کاربر */}
                   <span style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {comment.avatar_url ? (
                       <img
@@ -513,7 +584,7 @@ export default function AdminPage() {
                         style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                       />
                     ) : (
-                      <span style={{ fontSize: '22px' }}>👤</span>
+                      <span style={{ fontSize: '20px' }}>👤</span>
                     )}
                   </span>
                   
@@ -564,7 +635,7 @@ export default function AdminPage() {
               </h2>
               {users.map((user) => (
                 <div key={user.id} className="admin-item">
-                  <span style={{ fontSize: '28px', width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {user.avatar_url ? (
                       <img
                         src={user.avatar_url}
@@ -572,7 +643,7 @@ export default function AdminPage() {
                         style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                       />
                     ) : (
-                      '👤'
+                      <span style={{ fontSize: '20px' }}>👤</span>
                     )}
                   </span>
                   <div style={{ flex: 1 }}>

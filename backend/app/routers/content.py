@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 from typing import List, Optional
 from ..core.database import get_db
-from ..models import Content, Genre, ContentType, ContentStatus, Episode
+from ..core.permissions import require_admin, get_current_user
+from ..models import Content, Genre, ContentType, ContentStatus, Episode, User
 from ..schemas import ContentCreate, ContentUpdate, ContentResponse, EpisodeResponse
+from ..utils.file_upload import save_upload_file
 
 router = APIRouter(prefix="/content", tags=["Content"])
 
@@ -111,8 +113,12 @@ async def get_content_episodes(content_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=ContentResponse, status_code=status.HTTP_201_CREATED)
-async def create_content(content: ContentCreate, db: Session = Depends(get_db)):
-    """Create new content"""
+async def create_content(
+    content: ContentCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """Create new content (admin only)"""
     existing = db.query(Content).filter(Content.slug == content.slug).first()
     if existing:
         raise HTTPException(
@@ -135,7 +141,8 @@ async def create_content(content: ContentCreate, db: Session = Depends(get_db)):
         backdrop_url=content.backdrop_url,
         trailer_url=content.trailer_url,
         video_url=content.video_url,
-        download_url=content.download_url
+        download_url=content.download_url,
+        created_by=current_user.id
     )
     
     if content.genre_ids:
@@ -148,9 +155,37 @@ async def create_content(content: ContentCreate, db: Session = Depends(get_db)):
     return new_content
 
 
+@router.post("/{content_id}/poster")
+async def upload_content_poster(
+    content_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """Upload poster for content (admin only)"""
+    content = db.query(Content).filter(Content.id == content_id).first()
+    if not content:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Content not found"
+        )
+    
+    poster_url = save_upload_file(file, "posters")
+    content.poster_url = poster_url
+    db.commit()
+    db.refresh(content)
+    
+    return {"poster_url": poster_url}
+
+
 @router.put("/{content_id}", response_model=ContentResponse)
-async def update_content(content_id: int, content_update: ContentUpdate, db: Session = Depends(get_db)):
-    """Update content"""
+async def update_content(
+    content_id: int,
+    content_update: ContentUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """Update content (admin only)"""
     content = db.query(Content).filter(Content.id == content_id).first()
     if not content:
         raise HTTPException(
@@ -175,8 +210,12 @@ async def update_content(content_id: int, content_update: ContentUpdate, db: Ses
 
 
 @router.delete("/{content_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_content(content_id: int, db: Session = Depends(get_db)):
-    """Delete content"""
+async def delete_content(
+    content_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """Delete content (admin only)"""
     content = db.query(Content).filter(Content.id == content_id).first()
     if not content:
         raise HTTPException(
