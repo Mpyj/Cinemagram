@@ -10,8 +10,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<string>('');
-  const [username, setUsername] = useState<string>('');
+  const [userRole, setUserRole] = useState('');
+  const [username, setUsername] = useState('');
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -39,10 +39,19 @@ export default function Navbar() {
   }, []);
 
   const handleSearch = () => {
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
+    const query = searchQuery.trim();
+    if (query) {
+      router.push(`/search?q=${encodeURIComponent(query)}`);
+    } else {
+      router.push('/search');
     }
+    setSearchQuery('');
+    setMobileOpen(false);
+  };
+
+  const handleSearchClick = () => {
+    router.push('/search');
+    setMobileOpen(false);
   };
 
   const isAdmin = userRole === 'admin' || userRole === 'owner';
@@ -64,16 +73,28 @@ export default function Navbar() {
         </ul>
 
         <div className="nav-actions">
-          <div className="search-box">
+          <div className="search-box" onClick={handleSearchClick} style={{ cursor: 'pointer' }}>
             <span>🔍</span>
             <input
               type="text"
               placeholder="جستجو..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSearch();
+                }
+              }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ cursor: 'text' }}
             />
-            <button onClick={handleSearch}>جستجو</button>
+            <button onClick={(e) => {
+              e.stopPropagation();
+              handleSearch();
+            }}>
+              جستجو
+            </button>
           </div>
 
           <button className="theme-toggle" onClick={toggleTheme}>
@@ -133,7 +154,7 @@ export default function Navbar() {
             <a href="/admin" className="btn-secondary" style={{ width: '80%', justifyContent: 'center' }} onClick={() => setMobileOpen(false)}>مدیریت</a>
           )}
           
-          <div className="search-box" style={{ width: '80%' }}>
+          <div className="search-box" style={{ width: '80%' }} onClick={handleSearchClick}>
             <span>🔍</span>
             <input
               type="text"
@@ -141,9 +162,13 @@ export default function Navbar() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              style={{ flex: 1 }}
+              style={{ flex: 1, cursor: 'text' }}
+              onClick={(e) => e.stopPropagation()}
             />
-            <button onClick={handleSearch}>جستجو</button>
+            <button onClick={(e) => {
+              e.stopPropagation();
+              handleSearch();
+            }}>جستجو</button>
           </div>
 
           {isLoggedIn ? (
