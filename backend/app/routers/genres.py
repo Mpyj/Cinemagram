@@ -30,7 +30,6 @@ async def get_genre(genre_id: int, db: Session = Depends(get_db)):
 @router.post("/", response_model=GenreResponse, status_code=status.HTTP_201_CREATED)
 async def create_genre(genre: GenreCreate, db: Session = Depends(get_db)):
     """Create a new genre"""
-    # Check if genre exists
     existing = db.query(Genre).filter(
         (Genre.name == genre.name) | (Genre.slug == genre.slug)
     ).first()

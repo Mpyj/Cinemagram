@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import api from '@/lib/api';
-import { Content, User, Comment } from '@/lib/types';
+import { Content, User, Comment, Genre } from '@/lib/types';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -16,6 +16,7 @@ export default function AdminPage() {
   const [contents, setContents] = useState<Content[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
   const [loadingData, setLoadingData] = useState(false);
 
   const [newContentTitle, setNewContentTitle] = useState('');
@@ -24,8 +25,14 @@ export default function AdminPage() {
   const [newContentYear, setNewContentYear] = useState('');
   const [newContentRating, setNewContentRating] = useState('');
   const [newContentDescription, setNewContentDescription] = useState('');
+  const [newContentGenres, setNewContentGenres] = useState<number[]>([]);
   const [addingContent, setAddingContent] = useState(false);
   const [uploadingPoster, setUploadingPoster] = useState<number | null>(null);
+
+  // State برای افزودن ژانر جدید
+  const [newGenreName, setNewGenreName] = useState('');
+  const [addingGenre, setAddingGenre] = useState(false);
+  const [showGenreForm, setShowGenreForm] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -44,6 +51,7 @@ export default function AdminPage() {
         
         if (parsed.role === 'admin' || parsed.role === 'owner') {
           fetchAllData();
+          fetchGenres();
         } else {
           router.push('/');
         }
@@ -75,6 +83,54 @@ export default function AdminPage() {
     }
   };
 
+  const fetchGenres = async () => {
+    try {
+      const response = await api.get('/genres');
+      setGenres(response.data);
+    } catch (err) {
+      console.error('Error fetching genres:', err);
+    }
+  };
+
+  const toggleGenre = (genreId: number) => {
+    setNewContentGenres((prev) => {
+      if (prev.includes(genreId)) {
+        return prev.filter((id) => id !== genreId);
+      } else {
+        return [...prev, genreId];
+      }
+    });
+  };
+
+  const handleAddGenre = async () => {
+    if (!newGenreName.trim()) {
+      alert('نام ژانر الزامی است');
+      return;
+    }
+
+    setAddingGenre(true);
+    try {
+      const slug = newGenreName.trim().toLowerCase().replace(/\s+/g, '-');
+      await api.post('/genres', {
+        name: newGenreName.trim(),
+        slug: slug,
+      });
+      alert('✅ ژانر اضافه شد!');
+      setNewGenreName('');
+      setShowGenreForm(false);
+      fetchGenres();
+    } catch (err: any) {
+      console.error('Add genre error:', err);
+      if (err.response?.data?.detail) {
+        alert(`خطا: ${err.response.data.detail}`);
+      } else {
+        alert('خطا در افزودن ژانر');
+      }
+    } finally {
+      setAddingGenre(false);
+    }
+  };
+
   const handleAddContent = async () => {
     if (!newContentTitle.trim() || !newContentSlug.trim()) {
       alert('عنوان و اسلاگ الزامی است');
@@ -91,7 +147,7 @@ export default function AdminPage() {
         rating: newContentRating ? parseFloat(newContentRating) : null,
         description: newContentDescription || null,
         status: 'published',
-        genre_ids: [],
+        genre_ids: newContentGenres,
       });
       
       alert('✅ محتوا اضافه شد!');
@@ -101,6 +157,7 @@ export default function AdminPage() {
       setNewContentRating('');
       setNewContentDescription('');
       setNewContentType('movie');
+      setNewContentGenres([]);
       fetchAllData();
     } catch (err: any) {
       console.error('Add content error:', err);
@@ -365,7 +422,7 @@ export default function AdminPage() {
                   <input
                     type="text"
                     inputMode="numeric"
-                    placeholder="سال ساخت (مثلا: 1403)"
+                    placeholder="سال ساخت"
                     value={newContentYear}
                     onChange={(e) => setNewContentYear(e.target.value.replace(/[^0-9]/g, ''))}
                     className="form-input"
@@ -378,6 +435,70 @@ export default function AdminPage() {
                     onChange={(e) => setNewContentRating(e.target.value.replace(/[^0-9.]/g, ''))}
                     className="form-input"
                   />
+                </div>
+
+                {/* انتخاب ژانر + افزودن ژانر جدید */}
+                <div style={{ marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                      ژانرها:
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowGenreForm(!showGenreForm)}
+                      className="btn-secondary"
+                      style={{ padding: '4px 12px', fontSize: '0.7rem' }}
+                    >
+                      {showGenreForm ? '✕ بستن' : '+ ژانر جدید'}
+                    </button>
+                  </div>
+
+                  {/* فرم افزودن ژانر جدید */}
+                  {showGenreForm && (
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                      <input
+                        type="text"
+                        placeholder="نام ژانر (مثلا: عاشقانه)"
+                        value={newGenreName}
+                        onChange={(e) => setNewGenreName(e.target.value)}
+                        className="form-input"
+                        style={{ flex: 1 }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddGenre}
+                        disabled={addingGenre}
+                        className="btn-primary"
+                        style={{ padding: '8px 16px', fontSize: '0.8rem' }}
+                      >
+                        {addingGenre ? '...' : 'افزودن'}
+                      </button>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {genres.map((genre) => (
+                      <button
+                        key={genre.id}
+                        type="button"
+                        onClick={() => toggleGenre(genre.id)}
+                        className="tab"
+                        style={{
+                          padding: '6px 14px',
+                          fontSize: '0.75rem',
+                          background: newContentGenres.includes(genre.id)
+                            ? 'var(--gradient-1)'
+                            : 'var(--bg-card)',
+                          color: newContentGenres.includes(genre.id) ? 'white' : 'var(--text-muted)',
+                          border: newContentGenres.includes(genre.id)
+                            ? '1px solid transparent'
+                            : '1px solid var(--border)',
+                        }}
+                      >
+                        {genre.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 
                 <textarea
@@ -406,7 +527,6 @@ export default function AdminPage() {
               
               {contents.map((content) => (
                 <div key={content.id} className="admin-item">
-                  {/* نمایش پوستر */}
                   <span
                     style={{
                       width: '50px',
@@ -437,9 +557,17 @@ export default function AdminPage() {
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                       {content.slug} • {content.release_year || 'نامشخص'} • ⭐ {content.rating || 'N/A'}
                     </div>
+                    {content.genres && content.genres.length > 0 && (
+                      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '4px' }}>
+                        {content.genres.map((genre) => (
+                          <span key={genre.id} style={{ fontSize: '0.6rem', padding: '2px 8px', borderRadius: '10px', background: 'var(--bg-card)', color: 'var(--text-muted)' }}>
+                            {genre.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   
-                  {/* دکمه آپلود پوستر */}
                   <label
                     className="btn-secondary"
                     style={{
