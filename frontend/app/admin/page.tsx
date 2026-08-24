@@ -159,17 +159,21 @@ export default function AdminPage() {
 
     setAddingContent(true);
     try {
-      const payload = {
+      const payload: Record<string, any> = {
         title: newContentTitle.trim(),
         slug: newContentSlug.trim().toLowerCase().replace(/\s+/g, '-'),
         type: newContentType,
-        release_year: newContentYear ? parseInt(newContentYear) : null,
-        rating: newContentRating ? parseFloat(newContentRating) : null,
-        description: newContentDescription || null,
         status: 'published',
         genre_ids: newContentGenres,
-        download_url: newContentType === 'movie' ? (newContentDownloadUrl.trim() || null) : null,
       };
+
+      // فقط فیلدهایی که مقدار دارن رو اضافه کن
+      if (newContentYear) payload.release_year = parseInt(newContentYear);
+      if (newContentRating) payload.rating = parseFloat(newContentRating);
+      if (newContentDescription.trim()) payload.description = newContentDescription.trim();
+      if (newContentType === 'movie' && newContentDownloadUrl.trim()) {
+        payload.download_url = newContentDownloadUrl.trim();
+      }
       
       console.log('Sending payload:', payload);
       
@@ -188,7 +192,8 @@ export default function AdminPage() {
     } catch (err: any) {
       console.error('Add content error:', err);
       if (err.response?.data?.detail) {
-        alert(`خطا: ${err.response.data.detail}`);
+        console.error('Detail:', err.response.data.detail);
+        alert(`خطا: ${JSON.stringify(err.response.data.detail)}`);
       } else {
         alert('خطا در افزودن محتوا');
       }
@@ -213,21 +218,29 @@ export default function AdminPage() {
     if (!editingContent) return;
     setSavingEdit(true);
     try {
-      await api.put(`/content/${editingContent.id}`, {
+      const payload: Record<string, any> = {
         title: editTitle,
         slug: editSlug,
         type: editType,
-        release_year: editYear ? parseInt(editYear) : null,
-        rating: editRating ? parseFloat(editRating) : null,
-        description: editDescription || null,
-        download_url: editType === 'movie' ? (editDownloadUrl || null) : null,
         genre_ids: editGenres,
-      });
+      };
+
+      if (editYear) payload.release_year = parseInt(editYear);
+      if (editRating) payload.rating = parseFloat(editRating);
+      if (editDescription.trim()) payload.description = editDescription.trim();
+      if (editType === 'movie' && editDownloadUrl.trim()) {
+        payload.download_url = editDownloadUrl.trim();
+      }
+
+      await api.put(`/content/${editingContent.id}`, payload);
       alert('✅ تغییرات ذخیره شد!');
       setEditingContent(null);
       fetchAllData();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Save edit error:', err);
+      if (err.response?.data?.detail) {
+        console.error('Detail:', err.response.data.detail);
+      }
       alert('خطا در ذخیره تغییرات');
     } finally {
       setSavingEdit(false);
@@ -274,21 +287,26 @@ export default function AdminPage() {
 
     setAddingEpisode(true);
     try {
-      await api.post('/episodes', {
+      const payload: Record<string, any> = {
         content_id: episodeContentId,
         season_number: parseInt(episodeSeason) || 1,
         episode_number: parseInt(episodeNumber),
-        title: episodeTitle || null,
-        download_url: episodeDownloadUrl || null,
-      });
+      };
+      if (episodeTitle.trim()) payload.title = episodeTitle.trim();
+      if (episodeDownloadUrl.trim()) payload.download_url = episodeDownloadUrl.trim();
+
+      await api.post('/episodes', payload);
       alert('✅ اپیزود اضافه شد!');
       setEpisodeSeason('1');
       setEpisodeNumber('1');
       setEpisodeTitle('');
       setEpisodeDownloadUrl('');
       fetchEpisodes();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Add episode error:', err);
+      if (err.response?.data?.detail) {
+        console.error('Detail:', err.response.data.detail);
+      }
       alert('خطا در افزودن اپیزود');
     } finally {
       setAddingEpisode(false);
@@ -466,7 +484,7 @@ export default function AdminPage() {
         )}
 
         <div className="admin-panel">
-          {/* ===== تب محتوا ===== */}
+          {/* تب محتوا */}
           {activeTab === 'content' && (
             <>
               <div style={{ marginBottom: '20px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '14px', padding: '20px' }}>
@@ -487,20 +505,12 @@ export default function AdminPage() {
                   <input type="text" inputMode="decimal" placeholder="امتیاز" value={newContentRating} onChange={(e) => setNewContentRating(e.target.value.replace(/[^0-9.]/g, ''))} className="form-input" />
                 </div>
 
-                {/* فیلد دانلود فقط برای فیلم */}
                 {newContentType === 'movie' && (
                   <div style={{ marginBottom: '10px' }}>
-                    <input
-                      type="text"
-                      placeholder="لینک دانلود فیلم"
-                      value={newContentDownloadUrl}
-                      onChange={(e) => setNewContentDownloadUrl(e.target.value)}
-                      className="form-input"
-                    />
+                    <input type="text" placeholder="لینک دانلود فیلم" value={newContentDownloadUrl} onChange={(e) => setNewContentDownloadUrl(e.target.value)} className="form-input" />
                   </div>
                 )}
 
-                {/* ژانرها */}
                 <div style={{ marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>ژانرها:</label>
@@ -539,7 +549,6 @@ export default function AdminPage() {
                 </button>
               </div>
 
-              {/* فرم ویرایش */}
               {editingContent && (
                 <div style={{ marginBottom: '20px', background: 'var(--bg-card)', border: '1px solid var(--border-hover)', borderRadius: '14px', padding: '20px' }}>
                   <h3 style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '15px' }}>✏️ ویرایش: {editingContent.title}</h3>
@@ -594,7 +603,6 @@ export default function AdminPage() {
                 </div>
               )}
 
-              {/* لیست محتوا */}
               {contents.map((content) => (
                 <div key={content.id} className="admin-item">
                   <span style={{ width: '50px', height: '50px', borderRadius: '8px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '24px', background: 'var(--bg-card)' }}>
@@ -626,7 +634,7 @@ export default function AdminPage() {
             </>
           )}
 
-          {/* ===== تب اپیزودها ===== */}
+          {/* تب اپیزودها */}
           {activeTab === 'episodes' && (
             <>
               <div style={{ marginBottom: '20px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '14px', padding: '20px' }}>
@@ -677,7 +685,7 @@ export default function AdminPage() {
             </>
           )}
 
-          {/* ===== تب کاربران ===== */}
+          {/* تب کاربران */}
           {activeTab === 'users' && (
             <>
               {users.map((user) => {
@@ -718,7 +726,7 @@ export default function AdminPage() {
             </>
           )}
 
-          {/* ===== تب نظرات ===== */}
+          {/* تب نظرات */}
           {activeTab === 'comments' && (
             <>
               {comments.map((comment) => (
@@ -741,7 +749,7 @@ export default function AdminPage() {
             </>
           )}
 
-          {/* ===== تب نقش‌ها ===== */}
+          {/* تب نقش‌ها */}
           {activeTab === 'roles' && isOwner && (
             <>
               <h2 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '20px' }}>👑 مدیریت نقش‌ها</h2>
