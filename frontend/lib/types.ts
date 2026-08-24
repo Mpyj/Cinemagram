@@ -1,4 +1,5 @@
 // ===== User Types =====
+
 export interface User {
   id: number;
   username: string;
@@ -11,29 +12,27 @@ export interface User {
   ban_until?: string | null;
   mute_until?: string | null;
   created_at: string;
-  updated_at?: string;
 }
 
 // ===== Genre Types =====
+
 export interface Genre {
   id: number;
   name: string;
   slug: string;
-  description?: string | null;
+  description?: string;
 }
 
 // ===== Content Types =====
-export type ContentType = 'movie' | 'series' | 'anime';
-export type ContentStatus = 'published' | 'draft' | 'archived';
 
 export interface Content {
   id: number;
   title: string;
-  title_en?: string | null;
+  title_en?: string;
   slug: string;
-  description?: string | null;
-  type: ContentType;
-  status: ContentStatus;
+  description?: string;
+  type: 'movie' | 'series' | 'anime';
+  status: 'published' | 'draft' | 'archived';
   release_year?: number | null;
   rating?: number | null;
   country?: string | null;
@@ -46,25 +45,25 @@ export interface Content {
   views_count: number;
   genres: Genre[];
   created_at: string;
-  updated_at?: string;
 }
 
 // ===== Episode Types =====
+
 export interface Episode {
   id: number;
   content_id: number;
   season_number: number;
   episode_number: number;
-  title?: string | null;
-  description?: string | null;
-  video_url?: string | null;
-  download_url?: string | null;
-  thumbnail_url?: string | null;
-  duration_minutes?: number | null;
-  air_date?: string | null;
+  title?: string;
+  description?: string;
+  video_url?: string;
+  download_url?: string;
+  thumbnail_url?: string;
+  duration_minutes?: number;
 }
 
 // ===== Comment Types =====
+
 export interface Comment {
   id: number;
   user_id: number;
@@ -74,32 +73,18 @@ export interface Comment {
   is_approved: boolean;
   is_hidden: boolean;
   created_at: string;
-  updated_at?: string;
+  username?: string | null;
   replies?: Comment[] | null;
 }
 
-// ===== Rating Types =====
-export interface Rating {
-  id: number;
-  user_id: number;
-  content_id: number;
-  rating: number;
-  review_text?: string | null;
-  created_at: string;
-}
-
-// ===== Watchlist Types =====
-export type WatchlistStatus = 'watching' | 'completed' | 'plan_to_watch' | 'dropped';
-
-export interface Watchlist {
-  id: number;
-  user_id: number;
-  content_id: number;
-  status: WatchlistStatus;
-  added_at: string;
-}
-
 // ===== Auth Types =====
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+}
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -111,43 +96,22 @@ export interface RegisterRequest {
   password: string;
 }
 
-export interface TokenResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-}
+// ===== Watchlist Types =====
 
-export interface ChangePasswordRequest {
-  old_password: string;
-  new_password: string;
+export interface WatchlistItem {
+  id: number;
+  user_id: number;
+  content_id: number;
+  status: 'watching' | 'completed' | 'plan_to_watch' | 'dropped';
+  added_at: string;
+  content?: Content;
 }
 
 // ===== API Response Types =====
+
 export interface PaginatedResponse<T> {
   items: T[];
   total: number;
   page: number;
-  size: number;
-}
-
-// ===== Form Types =====
-export interface ContentFormData {
-  title: string;
-  title_en?: string;
-  slug: string;
-  description?: string;
-  type: ContentType;
-  release_year?: number;
-  rating?: number;
-  country?: string;
-  language?: string;
-  poster_url?: string;
-  trailer_url?: string;
-  genre_ids: number[];
-}
-
-export interface UserFormData {
-  username: string;
-  email: string;
-  bio?: string;
+  limit: number;
 }

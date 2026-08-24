@@ -10,22 +10,11 @@ from ..schemas import UserResponse, CommentResponse, ContentResponse
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
 
-# ===== Helper =====
-def is_owner(user: User) -> bool:
-    return user.role == UserRole.OWNER
-
-
-def is_admin(user: User) -> bool:
-    return user.role == UserRole.ADMIN
-
-
 def is_superior(user: User, target: User) -> bool:
     """Check if user can manage target"""
     if user.role == UserRole.OWNER:
-        # Owner می‌تونه همه رو مدیریت کنه به جز خودش
         return user.id != target.id
     elif user.role == UserRole.ADMIN:
-        # Admin فقط کاربر عادی رو می‌تونه مدیریت کنه
         return target.role == UserRole.USER
     return False
 
@@ -60,7 +49,6 @@ async def change_user_role(
     current_user: User = Depends(require_owner)
 ):
     """Change user role (owner only)"""
-    # فقط Owner می‌تونه نقش عوض کنه
     if current_user.role != UserRole.OWNER:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -74,7 +62,6 @@ async def change_user_role(
             detail="User not found"
         )
     
-    # Owner نمی‌تونه نقش خودش رو عوض کنه
     if user.id == current_user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -104,17 +91,10 @@ async def ban_user(
     """Ban a user"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+        raise HTTPException(status_code=404, detail="User not found")
     
-    # چک کن می‌تونه این کاربر رو بن کنه
     if not is_superior(current_user, user):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You cannot ban this user"
-        )
+        raise HTTPException(status_code=403, detail="You cannot ban this user")
     
     user.is_banned = True
     user.ban_until = datetime.utcnow() + timedelta(hours=duration_hours)
@@ -132,16 +112,10 @@ async def unban_user(
     """Unban a user"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+        raise HTTPException(status_code=404, detail="User not found")
     
     if not is_superior(current_user, user):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You cannot unban this user"
-        )
+        raise HTTPException(status_code=403, detail="You cannot unban this user")
     
     user.is_banned = False
     user.ban_until = None
@@ -160,16 +134,10 @@ async def mute_user(
     """Mute a user"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+        raise HTTPException(status_code=404, detail="User not found")
     
     if not is_superior(current_user, user):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You cannot mute this user"
-        )
+        raise HTTPException(status_code=403, detail="You cannot mute this user")
     
     user.mute_until = datetime.utcnow() + timedelta(hours=duration_hours)
     db.commit()
@@ -187,16 +155,10 @@ async def unmute_user(
     """Unmute a user"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+        raise HTTPException(status_code=404, detail="User not found")
     
     if not is_superior(current_user, user):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You cannot unmute this user"
-        )
+        raise HTTPException(status_code=403, detail="You cannot unmute this user")
     
     user.mute_until = None
     db.commit()
@@ -207,16 +169,33 @@ async def unmute_user(
 
 # ===== Comment Management =====
 
-@router.get("/comments", response_model=List[CommentResponse])
+@router.get("/comments")
 async def get_all_comments(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin)
 ):
-    """Get all comments (admin only)"""
-    query = db.query(Comment)
-    return query.order_by(Comment.created_at.desc()).offset(skip).limit(limit).all()
+    """Get all comments with username (admin only)"""
+    comments = db.query(Comment).order_by(Comment.created_at.desc()).offset(skip).limit(limit).all()
+    
+    result = []
+    for c in comments:
+        user = db.query(User).filter(User.id == c.user_id).first()
+        result.append({
+            "id": c.id,
+            "user_id": c.user_id,
+            "content_id": c.content_id,
+            "parent_id": c.parent_id,
+            "body": c.body,
+            "is_approved": c.is_approved,
+            "is_hidden": c.is_hidden,
+            "created_at": c.created_at,
+            "username": user.username if user else f"کاربر {c.user_id}",
+            "replies": None
+        })
+    
+    return result
 
 
 @router.put("/comments/{comment_id}/approve")
