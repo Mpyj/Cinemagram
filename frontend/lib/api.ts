@@ -34,9 +34,18 @@ api.interceptors.response.use(
   }
 );
 
+// ===== Types for Paginated Response =====
+export interface PaginatedContent {
+  items: Content[];
+  total: number;
+  page: number;
+  total_pages: number;
+}
+
+// ===== Content APIs =====
 export const getContent = async (params?: Record<string, string | number | undefined>) => {
   const response = await api.get('/content', { params });
-  return response.data as Content[];
+  return response.data as PaginatedContent;
 };
 
 export const getContentBySlug = async (slug: string) => {
@@ -56,11 +65,13 @@ export const getEpisodes = async (contentId: number) => {
   return response.data as Episode[];
 };
 
+// ===== Genre APIs =====
 export const getGenres = async () => {
   const response = await api.get('/genres');
   return response.data as Genre[];
 };
 
+// ===== Comment APIs =====
 export const getComments = async (contentId: number) => {
   const response = await api.get(`/comments/content/${contentId}`);
   return response.data as Comment[];
@@ -71,6 +82,7 @@ export const addComment = async (comment: { content_id: number; body: string; pa
   return response.data as Comment;
 };
 
+// ===== Auth APIs =====
 export const login = async (data: LoginRequest) => {
   const response = await api.post('/auth/login', data);
   return response.data as TokenResponse;
@@ -81,6 +93,7 @@ export const register = async (data: RegisterRequest) => {
   return response.data as User;
 };
 
+// ===== User APIs =====
 export const getMyProfile = async () => {
   const response = await api.get('/users/me');
   return response.data as User;
@@ -102,6 +115,7 @@ export const uploadAvatar = async (file: File) => {
   return response.data;
 };
 
+// ===== Watchlist APIs =====
 export const getWatchlist = async () => {
   const response = await api.get('/watchlist');
   return response.data as Content[];

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 from typing import List, Optional
 from ..core.database import get_db
-from ..core.permissions import require_admin, get_current_user
+from ..core.permissions import require_admin
 from ..models import Content, Genre, ContentType, ContentStatus, Episode, User
 from ..schemas import ContentCreate, ContentUpdate, ContentResponse, EpisodeResponse
 from ..utils.file_upload import save_upload_file
@@ -11,7 +11,7 @@ from ..utils.file_upload import save_upload_file
 router = APIRouter(prefix="/content", tags=["Content"])
 
 
-@router.get("/", response_model=List[ContentResponse])
+@router.get("/")
 async def get_all_content(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
@@ -23,7 +23,7 @@ async def get_all_content(
     sort: Optional[str] = Query("created_at", pattern="^(created_at|rating|views_count|release_year)$"),
     db: Session = Depends(get_db)
 ):
-    """Get all content with filters and search"""
+    """Get all content with filters, search, and pagination"""
     query = db.query(Content).options(joinedload(Content.genres))
     
     if type:
@@ -48,6 +48,8 @@ async def get_all_content(
             )
         )
     
+    total = query.count()
+    
     if sort == "rating":
         query = query.order_by(Content.rating.desc())
     elif sort == "views_count":
@@ -58,7 +60,13 @@ async def get_all_content(
         query = query.order_by(Content.created_at.desc())
     
     content = query.offset(skip).limit(limit).all()
-    return content
+    
+    return {
+        "items": content,
+        "total": total,
+        "page": skip // limit + 1,
+        "total_pages": (total + limit - 1) // limit,
+    }
 
 
 @router.get("/slug/{slug}", response_model=ContentResponse)
@@ -66,10 +74,7 @@ async def get_content_by_slug(slug: str, db: Session = Depends(get_db)):
     """Get content by slug"""
     content = db.query(Content).options(joinedload(Content.genres)).filter(Content.slug == slug).first()
     if not content:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Content not found"
-        )
+        raise HTTPException(status_code=404, detail="Content not found")
     
     content.views_count += 1
     db.commit()
@@ -83,10 +88,7 @@ async def get_content(content_id: int, db: Session = Depends(get_db)):
     """Get a specific content by ID"""
     content = db.query(Content).options(joinedload(Content.genres)).filter(Content.id == content_id).first()
     if not content:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Content not found"
-        )
+        raise HTTPException(status_code=404, detail="Content not found")
     
     content.views_count += 1
     db.commit()
@@ -100,10 +102,7 @@ async def get_content_episodes(content_id: int, db: Session = Depends(get_db)):
     """Get all episodes for a content"""
     content = db.query(Content).filter(Content.id == content_id).first()
     if not content:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Content not found"
-        )
+        raise HTTPException(status_code=404, detail="Content not found")
     
     episodes = db.query(Episode).filter(Episode.content_id == content_id).order_by(
         Episode.season_number, Episode.episode_number
@@ -121,10 +120,7 @@ async def create_content(
     """Create new content (admin only)"""
     existing = db.query(Content).filter(Content.slug == content.slug).first()
     if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Content with this slug already exists"
-        )
+        raise HTTPException(status_code=400, detail="Content with this slug already exists")
     
     new_content = Content(
         title=content.title,
@@ -165,10 +161,7 @@ async def upload_content_poster(
     """Upload poster for content (admin only)"""
     content = db.query(Content).filter(Content.id == content_id).first()
     if not content:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Content not found"
-        )
+        raise HTTPException(status_code=404, detail="Content not found")
     
     poster_url = save_upload_file(file, "posters")
     content.poster_url = poster_url
@@ -188,10 +181,7 @@ async def update_content(
     """Update content (admin only)"""
     content = db.query(Content).filter(Content.id == content_id).first()
     if not content:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Content not found"
-        )
+        raise HTTPException(status_code=404, detail="Content not found")
     
     for field, value in content_update.model_dump(exclude_unset=True).items():
         if field == "genre_ids" and value is not None:
@@ -218,10 +208,7 @@ async def delete_content(
     """Delete content (admin only)"""
     content = db.query(Content).filter(Content.id == content_id).first()
     if not content:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Content not found"
-        )
+        raise HTTPException(status_code=404, detail="Content not found")
     
     db.delete(content)
     db.commit()
