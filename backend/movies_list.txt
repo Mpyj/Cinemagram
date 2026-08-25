@@ -1,50 +1,50 @@
-The Shawshank Redemption
-The Godfather
-The Dark Knight
-The Godfather Part II
-12 Angry Men
-Schindler's List
-Pulp Fiction
-The Lord of the Rings: The Return of the King
-Fight Club
-Forrest Gump
-Inception
-The Matrix
-Goodfellas
-Interstellar
-The Silence of the Lambs
-Saving Private Ryan
-The Green Mile
-Se7en
-Gladiator
-The Prestige
-The Departed
-The Pianist
-Whiplash
-Parasite
-The Intouchables
-The Wolf of Wall Street
-Django Unchained
-The Truman Show
-The Sixth Sense
-The Usual Suspects
-Léon: The Professional
-American History X
-The Social Network
-The Dark Knight Rises
-Avengers: Endgame
-Avengers: Infinity War
-Spider-Man: No Way Home
-Joker
-Oppenheimer
-Dune
-Dune: Part Two
-Mad Max: Fury Road
-The Revenant
-Titanic
-Avatar
-Pirates of the Caribbean: The Curse of the Black Pearl
-Jurassic Park
-Back to the Future
-Terminator 2: Judgment Day
-The Shining
+The Shawshank Redemption | movie
+The Godfather | movie
+The Dark Knight | movie
+The Godfather Part II | movie
+12 Angry Men | movie
+Schindler's List | movie
+Pulp Fiction | movie
+The Lord of the Rings: The Return of the King | movie
+Fight Club | movie
+Forrest Gump | movie
+Inception | movie
+The Matrix | movie
+Goodfellas | movie
+Interstellar | movie
+The Silence of the Lambs | movie
+Saving Private Ryan | movie
+The Green Mile | movie
+Se7en | movie
+Gladiator | movie
+The Prestige | movie
+The Departed | movie
+The Pianist | movie
+Whiplash | movie
+Parasite | movie
+The Intouchables | movie
+The Wolf of Wall Street | movie
+Django Unchained | movie
+The Truman Show | movie
+The Sixth Sense | movie
+The Usual Suspects | movie
+Leon: The Professional | movie
+American History X | movie
+The Social Network | movie
+The Dark Knight Rises | movie
+Avengers: Endgame | movie
+Avengers: Infinity War | movie
+Spider-Man: No Way Home | movie
+Joker | movie
+Oppenheimer | movie
+Dune | movie
+Dune: Part Two | movie
+Mad Max: Fury Road | movie
+The Revenant | movie
+Titanic | movie
+Avatar | movie
+Pirates of the Caribbean: The Curse of the Black Pearl | movie
+Jurassic Park | movie
+Back to the Future | movie
+Terminator 2: Judgment Day | movie
+The Shining | movie

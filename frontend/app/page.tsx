@@ -31,11 +31,19 @@ export default function Home() {
           skip: (page - 1) * ITEMS_PER_PAGE,
           limit: ITEMS_PER_PAGE,
         };
+        
         if (activeCategory !== 'all') {
-          const singular = activeCategory === 'movies' ? 'movie' : activeCategory;
+          // تبدیل دسته‌بندی به type
+          const singular = activeCategory === 'movies' ? 'movie' 
+            : activeCategory === 'series' ? 'series' 
+            : activeCategory === 'anime' ? 'anime' 
+            : activeCategory;
           params.type = singular;
+          console.log('Fetching with type:', singular);
         }
+        
         const data = await getContent(params);
+        console.log('Response:', data);
         setContents(data.items);
         setTotalPages(data.total_pages);
         setTotal(data.total);
@@ -53,13 +61,11 @@ export default function Home() {
   const handleCategoryChange = (category: string) => {
     setActiveCategory(category);
     setPage(1);
-    // اسکرول نرم به بخش محتوا
     document.getElementById('content')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    // اسکرول نرم به بخش محتوا
     document.getElementById('content')?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -150,41 +156,26 @@ export default function Home() {
             />
           )}
 
-          {/* صفحه‌بندی */}
           {!loading && totalPages > 1 && (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', padding: '20px 16px', flexWrap: 'wrap' }}>
-              {/* دکمه قبلی */}
               <button
                 className="btn-secondary"
                 onClick={() => handlePageChange(Math.max(1, page - 1))}
                 disabled={page === 1}
-                style={{
-                  padding: '8px 14px',
-                  fontSize: '0.75rem',
-                  opacity: page === 1 ? 0.4 : 1,
-                  cursor: page === 1 ? 'not-allowed' : 'pointer',
-                }}
+                style={{ padding: '8px 14px', fontSize: '0.75rem', opacity: page === 1 ? 0.4 : 1, cursor: page === 1 ? 'not-allowed' : 'pointer' }}
               >
                 ⬅ قبلی
               </button>
 
-              {/* شماره صفحه اول */}
               {getPageNumbers()[0] > 1 && (
                 <>
-                  <button
-                    className={`tab ${page === 1 ? 'active' : ''}`}
-                    onClick={() => handlePageChange(1)}
-                    style={{ padding: '8px 12px', fontSize: '0.75rem' }}
-                  >
+                  <button className={`tab ${page === 1 ? 'active' : ''}`} onClick={() => handlePageChange(1)} style={{ padding: '8px 12px', fontSize: '0.75rem' }}>
                     ۱
                   </button>
-                  {getPageNumbers()[0] > 2 && (
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>...</span>
-                  )}
+                  {getPageNumbers()[0] > 2 && <span style={{ color: 'var(--text-muted)' }}>...</span>}
                 </>
               )}
 
-              {/* شماره صفحات */}
               {getPageNumbers().map((p) => (
                 <button
                   key={p}
@@ -196,33 +187,20 @@ export default function Home() {
                 </button>
               ))}
 
-              {/* شماره صفحه آخر */}
               {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
                 <>
-                  {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>...</span>
-                  )}
-                  <button
-                    className={`tab ${page === totalPages ? 'active' : ''}`}
-                    onClick={() => handlePageChange(totalPages)}
-                    style={{ padding: '8px 12px', fontSize: '0.75rem' }}
-                  >
+                  {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && <span style={{ color: 'var(--text-muted)' }}>...</span>}
+                  <button className={`tab ${page === totalPages ? 'active' : ''}`} onClick={() => handlePageChange(totalPages)} style={{ padding: '8px 12px', fontSize: '0.75rem' }}>
                     {totalPages.toLocaleString('fa-IR')}
                   </button>
                 </>
               )}
 
-              {/* دکمه بعدی */}
               <button
                 className="btn-secondary"
                 onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
                 disabled={page === totalPages}
-                style={{
-                  padding: '8px 14px',
-                  fontSize: '0.75rem',
-                  opacity: page === totalPages ? 0.4 : 1,
-                  cursor: page === totalPages ? 'not-allowed' : 'pointer',
-                }}
+                style={{ padding: '8px 14px', fontSize: '0.75rem', opacity: page === totalPages ? 0.4 : 1, cursor: page === totalPages ? 'not-allowed' : 'pointer' }}
               >
                 بعدی ➡
               </button>
