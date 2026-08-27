@@ -263,13 +263,12 @@ Cinemagram uses a modern cinematic visual identity.
 
 ## 📁 Project Structure
 
+```text
 Cinemagram/
 ├── README.md
 ├── README.fa.md
-│
 ├── assets/
 │   └── logo.jpg
-│
 ├── screenshots/
 │   ├── home.jpg
 │   ├── phone.jpg
@@ -282,19 +281,56 @@ Cinemagram/
 │   ├── app/
 │   │   ├── __init__.py
 │   │   ├── main.py
+│   │   │
 │   │   ├── core/
 │   │   │   ├── __init__.py
 │   │   │   ├── config.py
 │   │   │   ├── database.py
 │   │   │   └── security.py
+│   │   │
 │   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── user.py
+│   │   │   ├── content.py
+│   │   │   ├── genre.py
+│   │   │   ├── episode.py
+│   │   │   ├── comment.py
+│   │   │   ├── rating.py
+│   │   │   └── watchlist.py
+│   │   │
 │   │   ├── schemas/
+│   │   │   ├── __init__.py
+│   │   │   ├── user.py
+│   │   │   ├── content.py
+│   │   │   ├── genre.py
+│   │   │   ├── episode.py
+│   │   │   ├── comment.py
+│   │   │   └── auth.py
+│   │   │
 │   │   ├── routers/
+│   │   │   ├── __init__.py
+│   │   │   ├── auth.py
+│   │   │   ├── users.py
+│   │   │   ├── content.py
+│   │   │   ├── episodes.py
+│   │   │   ├── genres.py
+│   │   │   ├── comments.py
+│   │   │   ├── watchlist.py
+│   │   │   └── admin.py
+│   │   │
 │   │   ├── services/
+│   │   │   ├── auth_service.py
+│   │   │   ├── content_service.py
+│   │   │   └── user_service.py
+│   │   │
 │   │   └── utils/
+│   │       ├── file_upload.py
+│   │       └── validators.py
+│   │
 │   ├── uploads/
 │   │   ├── posters/
 │   │   └── avatars/
+│   │
 │   ├── import_from_tmdb.py
 │   ├── import_anime.py
 │   ├── seed_data.py
@@ -311,16 +347,22 @@ Cinemagram/
     │   ├── layout.tsx
     │   ├── page.tsx
     │   ├── globals.css
+    │   │
     │   ├── login/
     │   │   └── page.tsx
+    │   │
     │   ├── register/
     │   │   └── page.tsx
+    │   │
     │   ├── search/
     │   │   └── page.tsx
+    │   │
     │   ├── profile/
     │   │   └── page.tsx
+    │   │
     │   ├── admin/
     │   │   └── page.tsx
+    │   │
     │   └── content/
     │       └── [slug]/
     │           └── page.tsx
@@ -329,12 +371,15 @@ Cinemagram/
     │   ├── layout/
     │   │   ├── Navbar.tsx
     │   │   └── Footer.tsx
+    │   │
     │   ├── home/
     │   │   ├── Hero.tsx
     │   │   ├── CategoryTabs.tsx
     │   │   └── ContentGrid.tsx
+    │   │
     │   ├── content/
     │   │   └── MovieCard.tsx
+    │   │
     │   └── ui/
     │       └── BackToTop.tsx
     │
