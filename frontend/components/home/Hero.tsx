@@ -12,7 +12,7 @@ export default function Hero() {
       <div className="hero-content">
         <div className="hero-badge">
           <span className="dot"></span>
-          نسخه ۲.۰ منتشر شد
+          نسخه ۱.۰ منتشر شد
         </div>
         <h1 className="hero-title">
           دنیای <span className="gradient-text">فیلم، سریال و انیمه</span>
