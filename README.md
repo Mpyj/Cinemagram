@@ -1,138 +1,163 @@
 # 🎬 Cinemagram
 
-> **A modern full-stack platform for movies, TV series, and anime.**
+> A modern full-stack platform for movies, TV series, and anime.
 
-**Cinemagram** is a modern full-stack entertainment platform built for discovering, managing, searching, and downloading movies, TV series, and anime.
+[🇮🇷 مشاهده README فارسی](./README.fa.md)
 
-The project combines a powerful FastAPI backend with a modern Next.js frontend and provides authentication, role-based access control, content management, episode management, comments, watchlists, advanced search, responsive UI, and automated content importing.
+<div align="center">
+
+<img src="./assets/logo.jpg" width="180">
+
+# Cinemagram
+
+### Movies. Series. Anime. One place.
+
+</div>
+
+---
+
+## 📸 Screenshots
+
+### 🖥️ Desktop
+
+![Cinemagram Home](./screenshots/home.jpg)
+
+### 📱 Mobile
+
+![Cinemagram Mobile](./screenshots/phone.jpg)
+
+### 🔍 Search
+
+![Cinemagram Search](./screenshots/search.jpg)
+
+### 🎬 Content Details
+
+![Cinemagram Content](./screenshots/content.jpg)
+
+### 👤 Profile
+
+![Cinemagram Profile](./screenshots/profile.jpg)
+
+### 🛡️ Admin Panel
+
+![Cinemagram Admin](./screenshots/admin.jpg)
 
 ---
 
 ## ✨ Features
 
-### 👥 User System
+### 👥 Users
 
-* User registration
-* User login and logout
-* JWT-based authentication
-* Profile avatar upload
-* Change username
-* Change email
-* Change password
-* Membership date display
-* Persian calendar date support
-* User role display
-* Personal profile
-* Personal watchlist
+- Registration
+- Login / Logout
+- JWT authentication
+- Profile avatar upload
+- Change username, email and password
+- Membership date display
+- Persian calendar date support
+- User role display
+- Personal profile
+- Personal watchlist
 
----
+### 🛡️ Roles
 
-### 🛡️ Role-Based Access Control
+Cinemagram includes three roles:
 
-Cinemagram includes three user roles:
+| Role | Permissions |
+|------|-------------|
+| 👑 Owner | Full access + promote / demote admins |
+| 🛡️ Admin | Manage content, users and comments |
+| 👤 User | Use the platform |
 
-| Role      | Permissions                                            |
-| --------- | ------------------------------------------------------ |
-| 👑 Owner  | Full system access + promote/demote administrators     |
-| 🛡️ Admin | Manage content, users and comments                     |
-| 👤 User   | Browse, search, download, comment and use the platform |
-
-Administrators can also manage users through actions such as:
-
-* Ban
-* Mute
-* User management
+Admins can manage users with actions such as ban and mute.
 
 ---
 
-# 🎬 Content Management
+## 🎬 Content Management
 
-Cinemagram supports three main content types:
+Cinemagram supports:
 
-* 🎞️ Movies
-* 📺 TV Series
-* 🍿 Anime
+- 🎞️ Movies
+- 📺 TV Series
+- 🍿 Anime
 
-Administrators can:
+Admins can:
 
-* Add content
-* Edit content
-* Delete content
-* Upload posters
-* Assign multiple genres
-* Create new genres
-* Set release year
-* Set rating from `0 - 10`
-* Add movie download links
-* Create seasons
-* Add episodes
-* Add individual episode links
+- Add content
+- Edit content
+- Delete content
+- Upload posters
+- Assign multiple genres
+- Create new genres
+- Set release year
+- Set rating from 0 to 10
+- Add movie download links
+- Create seasons
+- Add episodes
+- Add episode links
 
 ---
 
-# 🔍 Advanced Search
-
-Cinemagram provides a flexible search and filtering system.
+## 🔍 Search
 
 ### Search
 
-* Search by title
+- Search by title
 
 ### Filters
 
-* Content type
-* Genre
-* Release year
-* Minimum rating
+- Content type
+- Genre
+- Release year
+- Minimum rating
 
 ### Sorting
 
-* Newest
-* Rating
-* Views
-* Release year
+- Newest
+- Rating
+- Views
+- Release year
 
 ---
 
-# ❤️ Watchlist
+## ❤️ Watchlist
 
 Users can:
 
-* Add movies, series and anime to their watchlist
-* Remove content from their watchlist
-* View saved content from their profile
+- Add content to their watchlist
+- Remove content from their watchlist
+- View saved content from their profile
 
 ---
 
-# 💬 Comments
+## 💬 Comments
 
-Users can leave comments under movies, series and anime.
+Users can comment on movies, series and anime.
 
-Each comment displays:
+Each comment includes:
 
-* Username
-* Profile avatar
-* Comment text
+- Username
+- Profile avatar
+- Comment text
 
-Administrators can:
+Admins can:
 
-* Approve comments
-* Hide comments
-* Delete comments
+- Approve comments
+- Hide comments
+- Delete comments
 
 ---
 
-# 📥 Download System
+## 📥 Download System
 
-## Movies
+### Movies
 
-Movies can have direct download links.
+Movies can provide direct download links.
 
-## TV Series & Anime
+### Series & Anime
 
-Episodes are organized by seasons:
+Episodes are organized by season:
 
-```text
 Season 1
 ├── Episode 1
 ├── Episode 2
@@ -142,117 +167,116 @@ Season 2
 ├── Episode 1
 ├── Episode 2
 └── Episode 3
-```
 
 ---
 
-# 📥 Automated Import System
+## 📥 Automated Import
 
-One of Cinemagram's key features is its automated content import system.
+Cinemagram supports automated content importing.
 
-## 🎥 TMDB
+### 🎥 TMDB
 
-Movies and TV series can be imported automatically from TMDB, including available information such as:
+Import movies and TV series with available:
 
-* Title
-* Poster
-* Genres
-* Rating
-* Metadata
+- Title
+- Poster
+- Genres
+- Rating
+- Metadata
 
-## 🍿 Jikan / MyAnimeList
+### 🍿 Jikan / MyAnimeList
 
 Anime information can be imported through the Jikan API.
 
-## 📄 Local Files
+### 📄 Local Files
 
-Cinemagram also supports importing from:
+Supported formats:
 
-* JSON
-* CSV
-* Excel
-* Text files containing links
-
-This makes it possible to populate the database much faster without manually entering every item.
+- JSON
+- CSV
+- Excel
+- Text files containing links
 
 ---
 
-# 📱 Responsive Interface
+## 📱 Responsive UI
 
-Cinemagram is designed for:
+Designed for:
 
-* 📱 Mobile
-* 📲 Tablet
-* 💻 Desktop
+- 📱 Mobile
+- 📲 Tablet
+- 💻 Desktop
 
-### UI Features
+Includes:
 
-* Fully responsive layout
-* Mobile hamburger menu
-* Dark / Light mode
-* Pagination
-* Smooth animations
-* Hover effects
-* Active states
-* Glassmorphism
-* Animated gradient backgrounds
-
----
-
-# 🎨 Design
-
-Cinemagram uses a modern cinematic visual style.
-
-### Color Palette
-
-* 🟣 Purple
-* 🌸 Pink
-* 🩵 Turquoise
-
-### Visual Features
-
-* Glassmorphism
-* Animated gradient backgrounds
-* Framer Motion animations
-* Hover effects
-* Active states
-* Dark / Light themes
-* Vazirmatn Persian font
+- Responsive layout
+- Mobile hamburger menu
+- Dark / Light mode
+- Pagination
+- Framer Motion animations
+- Hover effects
+- Active states
+- Glassmorphism
+- Animated gradient backgrounds
 
 ---
 
-# 🛠️ Tech Stack
+## 🎨 Design
 
-## Backend
+Cinemagram uses a modern cinematic visual identity.
 
-* **Python**
-* **FastAPI**
-* **PostgreSQL**
-* **SQLAlchemy**
-* **Pydantic**
-* **JWT**
-
-## Frontend
-
-* **Next.js 14**
-* **TypeScript**
-* **Tailwind CSS**
-* **Framer Motion**
-* **Axios**
-
-## External APIs
-
-* **TMDB** — Movies & TV Series
-* **Jikan / MyAnimeList** — Anime
+- Purple / Pink / Turquoise color palette
+- Glassmorphism
+- Animated gradients
+- Framer Motion animations
+- Dark / Light themes
+- Vazirmatn font
+- Modern hover and active effects
 
 ---
 
-# 📁 Project Structure
+## 🛠️ Tech Stack
 
-```text
+### Backend
+
+- Python
+- FastAPI
+- PostgreSQL
+- SQLAlchemy
+- Pydantic
+- JWT
+
+### Frontend
+
+- Next.js 14
+- TypeScript
+- Tailwind CSS
+- Framer Motion
+- Axios
+
+### External APIs
+
+- TMDB — Movies & TV Series
+- Jikan / MyAnimeList — Anime
+
+---
+
+## 📁 Project Structure
+
 Cinemagram/
 ├── README.md
 ├── README.fa.md
+│
+├── assets/
+│   └── logo.jpg
+│
+├── screenshots/
+│   ├── home.jpg
+│   ├── phone.jpg
+│   ├── search.jpg
+│   ├── content.jpg
+│   ├── profile.jpg
+│   └── admin.jpg
 │
 ├── backend/
 │   ├── app/
@@ -264,39 +288,10 @@ Cinemagram/
 │   │   │   ├── database.py
 │   │   │   └── security.py
 │   │   ├── models/
-│   │   │   ├── __init__.py
-│   │   │   ├── user.py
-│   │   │   ├── content.py
-│   │   │   ├── genre.py
-│   │   │   ├── episode.py
-│   │   │   ├── comment.py
-│   │   │   ├── rating.py
-│   │   │   └── watchlist.py
 │   │   ├── schemas/
-│   │   │   ├── __init__.py
-│   │   │   ├── user.py
-│   │   │   ├── content.py
-│   │   │   ├── genre.py
-│   │   │   ├── episode.py
-│   │   │   ├── comment.py
-│   │   │   └── auth.py
 │   │   ├── routers/
-│   │   │   ├── __init__.py
-│   │   │   ├── auth.py
-│   │   │   ├── users.py
-│   │   │   ├── content.py
-│   │   │   ├── episodes.py
-│   │   │   ├── genres.py
-│   │   │   ├── comments.py
-│   │   │   ├── watchlist.py
-│   │   │   └── admin.py
 │   │   ├── services/
-│   │   │   ├── auth_service.py
-│   │   │   ├── content_service.py
-│   │   │   └── user_service.py
 │   │   └── utils/
-│   │       ├── file_upload.py
-│   │       └── validators.py
 │   ├── uploads/
 │   │   ├── posters/
 │   │   └── avatars/
@@ -306,144 +301,148 @@ Cinemagram/
 │   └── requirements.txt
 │
 └── frontend/
+    ├── .env.local
+    ├── .gitignore
+    ├── next.config.ts
+    ├── package.json
+    ├── tsconfig.json
+    │
     ├── app/
     │   ├── layout.tsx
     │   ├── page.tsx
     │   ├── globals.css
-    │   ├── search/
     │   ├── login/
+    │   │   └── page.tsx
     │   ├── register/
+    │   │   └── page.tsx
+    │   ├── search/
+    │   │   └── page.tsx
     │   ├── profile/
+    │   │   └── page.tsx
     │   ├── admin/
+    │   │   └── page.tsx
     │   └── content/
+    │       └── [slug]/
+    │           └── page.tsx
+    │
     ├── components/
-    ├── lib/
+    │   ├── layout/
+    │   │   ├── Navbar.tsx
+    │   │   └── Footer.tsx
+    │   ├── home/
+    │   │   ├── Hero.tsx
+    │   │   ├── CategoryTabs.tsx
+    │   │   └── ContentGrid.tsx
+    │   ├── content/
+    │   │   └── MovieCard.tsx
+    │   └── ui/
+    │       └── BackToTop.tsx
+    │
     ├── context/
+    │   ├── ThemeContext.tsx
+    │   └── AuthContext.tsx
+    │
     ├── hooks/
+    │   ├── useAuth.ts
+    │   └── useContent.ts
+    │
+    ├── lib/
+    │   ├── api.ts
+    │   └── types.ts
+    │
     └── public/
         └── fonts/
-```
+            ├── Vazirmatn-Regular.woff2
+            ├── Vazirmatn-Bold.woff2
+            └── Vazirmatn-Black.woff2
 
 ---
 
-# 🚀 Getting Started
+## 🚀 Getting Started
 
-## 1. Clone the Repository
+### Clone the Repository
 
-```bash
 git clone https://github.com/Mpyj/Cinemagram.git
 cd Cinemagram
-```
 
----
+### Backend
 
-## 2. Backend Setup
-
-```bash
 cd backend
 
 python -m venv venv
-```
 
-### Windows
+Windows:
 
-```bash
 venv\Scripts\activate
-```
 
-### Install Dependencies
+Install dependencies:
 
-```bash
 pip install -r requirements.txt
-```
 
-### Start the Backend
+Run the backend:
 
-```bash
 uvicorn app.main:app --reload
-```
 
 ---
 
-# 🗄️ Database Setup
+## 🗄️ Database
 
-Make sure PostgreSQL is installed and running.
+Make sure PostgreSQL is running.
 
-Open PostgreSQL:
-
-```bash
 psql -U postgres -h localhost
-```
 
 Create the database:
 
-```sql
 CREATE DATABASE cinemagram;
-```
 
-Then seed the initial data:
+Seed initial data:
 
-```bash
 python seed_data.py
-```
 
 ---
 
-# 🌐 Frontend Setup
+## 🌐 Frontend
 
-Open another terminal:
-
-```bash
 cd frontend
 
 npm install
 
 npm run dev
-```
 
 ---
 
-# 📥 Import Content
+## 📥 Import Content
 
 ### Movies
 
-```bash
 python import_from_tmdb.py movies_list.txt --list
-```
 
 ### TV Series
 
-```bash
 python import_from_tmdb.py series_list.txt --list
-```
 
 ### Anime
 
-```bash
 python import_anime.py anime_list.txt --list
-```
 
 ---
 
-# 🔐 Environment Variables
+## 🔐 Environment Variables
 
-Configure your environment variables according to your setup.
+Create a .env.local file inside the frontend directory.
 
 Example:
 
-```env
-DATABASE_URL=
-JWT_SECRET=
-TMDB_API_KEY=
-```
+NEXT_PUBLIC_API_URL=
 
-> **Never commit API keys, passwords, database credentials, or JWT secrets to Git.**
+Configure the required environment variables according to your local setup.
+
+> Important: Never commit API keys, passwords, database credentials, JWT secrets or .env.local to Git.
 
 ---
 
-# 🧩 Architecture
+## 🧩 Architecture
 
-```text
                     ┌───────────────────┐
                     │      Next.js      │
                     │     Frontend      │
@@ -467,79 +466,65 @@ TMDB_API_KEY=
                  ┌────────────┴────────────┐
                  ▼                         ▼
                TMDB                      Jikan
-```
 
 ---
 
-# 📌 Pagination
+## 📌 Pagination
 
-Content lists use pagination with:
-
-```text
-20 items per page
-```
+Content lists use 20 items per page.
 
 ---
 
-# 🔮 Future Plans
+## 🔮 Future Plans
 
-Potential future improvements include:
-
-* Personalized recommendations
-* Advanced rating system
-* Watch history
-* Continue Watching
-* Multiple download qualities
-* Advanced admin analytics
-* More import sources
-* Notification system
-* Advanced caching
-* SEO improvements
-* Deployment automation
+- Personalized recommendations
+- Watch history
+- Continue Watching
+- Multiple download qualities
+- Advanced admin analytics
+- More import sources
+- Notification system
+- Advanced caching
+- SEO improvements
+- Deployment automation
 
 ---
 
-# ⚖️ Usage & Attribution
+## ⚖️ Usage & Attribution
 
-Cinemagram is available for **learning, personal use, inspection, and development**.
+Cinemagram is available for learning, personal use, inspection and development.
 
-You may use parts of the source code, design, or project structure **with proper attribution**.
+Using parts of the source code, design or project structure is allowed with proper attribution.
 
-## Rules
+### Rules
 
-* Educational and personal use is allowed.
-* Using parts of the source code with attribution is allowed.
-* If you publish a modified version or use a significant portion of the project, you must credit **Mpyj** as the original creator.
-* Removing the original creator's name or source attribution is not allowed.
-* Republishing the complete project without attribution is not allowed.
+- Educational and personal use is allowed.
+- Source code may be reused with attribution.
+- Modified versions must credit Mpyj as the original creator.
+- Removing the original creator's name or source is not allowed.
+- Republishing the complete project without attribution is not allowed.
 
-## Attribution
+### Attribution
 
-If you use this project or any part of it, please include:
-
-```text
 Cinemagram
 Created by Mpyj
 Source: https://github.com/Mpyj/Cinemagram
 Telegram: https://t.me/MpyjTelegram
-```
 
 ---
 
-# 👨‍💻 Created by Mpyj
+## 👨‍💻 Created by Mpyj
 
-**Mpyj**
+Mpyj
 
 Programmer • Builder • Tech Enthusiast
 
-### 🔗 Links
-
-* GitHub: https://github.com/Mpyj
-* Telegram: https://t.me/MpyjTelegram
+GitHub: https://github.com/Mpyj
+Telegram: https://t.me/MpyjTelegram
 
 ---
 
-# 📄 License
+## 📄 License
 
 This project is distributed under the usage and attribution terms described in this README.
 
@@ -551,4 +536,4 @@ For commercial use or full-project redistribution, please contact the original c
 
 ### Movies. Series. Anime. One place.
 
-**Built with ❤️ and code by Mpyj.**
+Built with ❤️ and code by Mpyj.
