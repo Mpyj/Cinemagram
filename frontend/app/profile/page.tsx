@@ -2,38 +2,35 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import BackToTop from '@/components/ui/BackToTop';
-import api from '@/lib/api';
-import {
+
+import api, {
 getMyProfile,
 uploadAvatar,
 getWatchlist,
 removeFromWatchlist,
 } from '@/lib/api';
-import { Content, Comment } from '@/lib/types';
 
-interface UserProfile {
-id: number;
-username: string;
-email: string;
-role: 'owner' | 'admin' | 'user';
-avatar_url?: string | null;
-bio?: string | null;
-created_at: string;
-}
+import { Content, Comment, User } from '@/lib/types';
 
 export default function ProfilePage() {
 const router = useRouter();
 
 const [activeTab, setActiveTab] = useState('watchlist');
-const [userData, setUserData] = useState<UserProfile | null>(null);
+
+const [userData, setUserData] = useState<User | null>(null);
+
 const [watchlist, setWatchlist] = useState<Content[]>([]);
 const [myComments, setMyComments] = useState<Comment[]>([]);
+
 const [loadingWatchlist, setLoadingWatchlist] = useState(false);
 const [loadingComments, setLoadingComments] = useState(false);
+
 const [showFullDate, setShowFullDate] = useState(false);
+
 const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 const [avatarFile, setAvatarFile] = useState<File | null>(null);
 const [uploading, setUploading] = useState(false);
@@ -41,7 +38,6 @@ const [uploading, setUploading] = useState(false);
 useEffect(() => {
 const token = localStorage.getItem('access_token');
 
-```
 if (!token) {
   router.push('/login');
   return;
@@ -51,15 +47,14 @@ const savedUser = localStorage.getItem('user');
 
 if (savedUser) {
   try {
-    const parsed = JSON.parse(savedUser);
-    setUserData(parsed);
+    const parsedUser = JSON.parse(savedUser) as User;
+    setUserData(parsedUser);
   } catch {
     fetchProfile();
   }
 } else {
   fetchProfile();
 }
-```
 
 }, []);
 
@@ -68,11 +63,9 @@ if (activeTab === 'watchlist') {
 fetchWatchlist();
 }
 
-```
 if (activeTab === 'comments') {
   fetchMyComments();
 }
-```
 
 }, [activeTab]);
 
@@ -80,7 +73,6 @@ const fetchProfile = async () => {
 try {
 const data = await getMyProfile();
 
-```
   setUserData(data);
 
   localStorage.setItem(
@@ -93,30 +85,32 @@ const data = await getMyProfile();
     err
   );
 }
-```
 
 };
 
 const fetchWatchlist = async () => {
 setLoadingWatchlist(true);
 
-```
 try {
   const data = await getWatchlist();
+
   setWatchlist(data);
-} catch {
+} catch (err) {
+  console.error(
+    'Error fetching watchlist:',
+    err
+  );
+
   setWatchlist([]);
 } finally {
   setLoadingWatchlist(false);
 }
-```
 
 };
 
 const fetchMyComments = async () => {
 setLoadingComments(true);
 
-```
 try {
   const response = await api.get(
     '/users/me/comments'
@@ -133,7 +127,6 @@ try {
 } finally {
   setLoadingComments(false);
 }
-```
 
 };
 
@@ -144,17 +137,20 @@ if (!confirm('از علاقه‌مندی‌ها حذف شود؟')) {
 return;
 }
 
-```
 try {
   await removeFromWatchlist(contentId);
 
   alert('از علاقه‌مندی‌ها حذف شد!');
 
   fetchWatchlist();
-} catch {
+} catch (err) {
+  console.error(
+    'Error removing from watchlist:',
+    err
+  );
+
   alert('خطا در حذف از علاقه‌مندی‌ها');
 }
-```
 
 };
 
@@ -162,9 +158,7 @@ const handleLogout = () => {
 localStorage.removeItem('access_token');
 localStorage.removeItem('user');
 
-```
 router.push('/login');
-```
 
 };
 
@@ -173,7 +167,6 @@ e: React.ChangeEvent<HTMLInputElement>
 ) => {
 const file = e.target.files?.[0];
 
-```
 if (!file) {
   return;
 }
@@ -183,13 +176,14 @@ setAvatarFile(file);
 const reader = new FileReader();
 
 reader.onload = (event) => {
-  setAvatarPreview(
-    event.target?.result as string
-  );
+  const result = event.target?.result;
+
+  if (typeof result === 'string') {
+    setAvatarPreview(result);
+  }
 };
 
 reader.readAsDataURL(file);
-```
 
 };
 
@@ -198,7 +192,6 @@ if (!avatarFile) {
 return;
 }
 
-```
 setUploading(true);
 
 try {
@@ -207,43 +200,56 @@ try {
   );
 
   if (result?.avatar_url) {
-    setUserData((prev) =>
-      prev
-        ? {
-            ...prev,
-            avatar_url: result.avatar_url,
-          }
-        : prev
-    );
+    setUserData((prev) => {
+      if (!prev) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        avatar_url: result.avatar_url,
+      };
+    });
 
     const savedUser =
       localStorage.getItem('user');
 
     if (savedUser) {
-      const parsed = JSON.parse(savedUser);
+      try {
+        const parsedUser = JSON.parse(
+          savedUser
+        ) as User;
 
-      parsed.avatar_url =
-        result.avatar_url;
+        parsedUser.avatar_url =
+          result.avatar_url;
 
-      localStorage.setItem(
-        'user',
-        JSON.stringify(parsed)
-      );
+        localStorage.setItem(
+          'user',
+          JSON.stringify(parsedUser)
+        );
+      } catch (err) {
+        console.error(
+          'Error updating saved user:',
+          err
+        );
+      }
     }
 
     setAvatarFile(null);
     setAvatarPreview(null);
 
-    alert(
-      'عکس پروفایل آپدیت شد!'
-    );
+    alert('عکس پروفایل آپدیت شد!');
   }
-} catch {
+} catch (err) {
+  console.error(
+    'Error uploading avatar:',
+    err
+  );
+
   alert('خطا در آپلود عکس');
 } finally {
   setUploading(false);
 }
-```
 
 };
 
@@ -252,7 +258,6 @@ dateString: string
 ) => {
 const date = new Date(dateString);
 
-```
 return new Intl.DateTimeFormat(
   'fa-IR',
   {
@@ -261,7 +266,6 @@ return new Intl.DateTimeFormat(
     day: 'numeric',
   }
 ).format(date);
-```
 
 };
 
@@ -270,14 +274,12 @@ dateString: string
 ) => {
 const date = new Date(dateString);
 
-```
 return new Intl.DateTimeFormat(
   'fa-IR',
   {
     year: 'numeric',
   }
 ).format(date);
-```
 
 };
 
@@ -296,12 +298,13 @@ label: '⚙️ تنظیمات',
 },
 ];
 
-const getRoleLabel = (role: string) => {
+const getRoleLabel = (
+role: string
+) => {
 switch (role) {
 case 'owner':
 return 'مالک';
 
-```
   case 'admin':
     return 'ادمین';
 
@@ -311,7 +314,6 @@ return 'مالک';
   default:
     return role;
 }
-```
 
 };
 
@@ -322,7 +324,6 @@ switch (type) {
 case 'movie':
 return '🎬';
 
-```
   case 'series':
     return '📺';
 
@@ -332,7 +333,6 @@ return '🎬';
   default:
     return '🎬';
 }
-```
 
 };
 
@@ -408,9 +408,7 @@ return (
             <input
               type="file"
               accept="image/*"
-              onChange={
-                handleAvatarUpload
-              }
+              onChange={handleAvatarUpload}
               style={{
                 display: 'none',
               }}
@@ -439,7 +437,7 @@ return (
                     'owner'
                       ? 'linear-gradient(135deg, #fdcb6e, #fd79a8)'
                       : userData.role ===
-                          'admin'
+                        'admin'
                         ? 'linear-gradient(135deg, #6c5ce7, #a29bfe)'
                         : 'var(--bg-card)',
                   color:
@@ -492,8 +490,7 @@ return (
             <p
               className="profile-info"
               style={{
-                fontSize:
-                  '0.8rem',
+                fontSize: '0.8rem',
               }}
             >
               📧 {userData.email}
@@ -518,9 +515,7 @@ return (
         {avatarFile && (
           <button
             className="btn-primary"
-            onClick={
-              handleAvatarSubmit
-            }
+            onClick={handleAvatarSubmit}
             disabled={uploading}
             style={{
               padding: '8px 20px',
@@ -556,16 +551,13 @@ return (
     </div>
 
     <div className="profile-card">
-      {/* ===== تب علاقه‌مندی‌ها ===== */}
-      {activeTab ===
-        'watchlist' && (
+      {activeTab === 'watchlist' && (
         <>
           <h2
             style={{
               fontSize: '1.1rem',
               fontWeight: 800,
-              marginBottom:
-                '20px',
+              marginBottom: '20px',
             }}
           >
             ❤️ علاقه‌مندی‌های من (
@@ -575,12 +567,10 @@ return (
           {loadingWatchlist && (
             <div
               style={{
-                textAlign:
-                  'center',
+                textAlign: 'center',
                 color:
                   'var(--text-muted)',
-                padding:
-                  '20px',
+                padding: '20px',
               }}
             >
               در حال بارگذاری...
@@ -588,21 +578,17 @@ return (
           )}
 
           {!loadingWatchlist &&
-            watchlist.length ===
-              0 && (
+            watchlist.length === 0 && (
               <div
                 style={{
-                  textAlign:
-                    'center',
+                  textAlign: 'center',
                   color:
                     'var(--text-muted)',
-                  padding:
-                    '30px 0',
+                  padding: '30px 0',
                 }}
               >
                 هنوز محتوایی به
-                علاقه‌مندی‌ها اضافه
-                نکردید
+                علاقه‌مندی‌ها اضافه نکردید
               </div>
             )}
 
@@ -614,23 +600,16 @@ return (
               >
                 <span
                   style={{
-                    width:
-                      '50px',
-                    height:
-                      '50px',
-                    borderRadius:
-                      '8px',
-                    overflow:
-                      'hidden',
-                    display:
-                      'flex',
-                    alignItems:
-                      'center',
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent:
                       'center',
                     flexShrink: 0,
-                    fontSize:
-                      '22px',
+                    fontSize: '22px',
                     background:
                       'var(--bg-card)',
                   }}
@@ -644,12 +623,9 @@ return (
                         content.title
                       }
                       style={{
-                        width:
-                          '50px',
-                        height:
-                          '50px',
-                        objectFit:
-                          'cover',
+                        width: '50px',
+                        height: '50px',
+                        objectFit: 'cover',
                       }}
                     />
                   ) : (
@@ -662,8 +638,7 @@ return (
                 <div
                   style={{
                     flex: 1,
-                    cursor:
-                      'pointer',
+                    cursor: 'pointer',
                   }}
                   onClick={() =>
                     router.push(
@@ -673,8 +648,7 @@ return (
                 >
                   <div
                     style={{
-                      fontWeight:
-                        700,
+                      fontWeight: 700,
                       fontSize:
                         '0.9rem',
                     }}
@@ -692,8 +666,8 @@ return (
                   >
                     {content.genres
                       ?.map(
-                        (g) =>
-                          g.name
+                        (genre) =>
+                          genre.name
                       )
                       .join('، ') ||
                       'بدون ژانر'}
@@ -702,16 +676,14 @@ return (
 
                 <span
                   style={{
-                    color:
-                      '#fdcb6e',
-                    fontWeight:
-                      700,
+                    color: '#fdcb6e',
+                    fontWeight: 700,
                     fontSize:
                       '0.85rem',
                   }}
                 >
                   ⭐{' '}
-                  {content.rating ||
+                  {content.rating ??
                     'N/A'}
                 </span>
 
@@ -723,12 +695,10 @@ return (
                     )
                   }
                   style={{
-                    padding:
-                      '6px 12px',
+                    padding: '6px 12px',
                     fontSize:
                       '0.7rem',
-                    color:
-                      '#fd79a8',
+                    color: '#fd79a8',
                     borderColor:
                       'rgba(253,121,168,0.3)',
                     whiteSpace:
@@ -743,16 +713,13 @@ return (
         </>
       )}
 
-      {/* ===== تب نظرات ===== */}
-      {activeTab ===
-        'comments' && (
+      {activeTab === 'comments' && (
         <>
           <h2
             style={{
               fontSize: '1.1rem',
               fontWeight: 800,
-              marginBottom:
-                '20px',
+              marginBottom: '20px',
             }}
           >
             💬 نظرات من (
@@ -762,12 +729,10 @@ return (
           {loadingComments && (
             <div
               style={{
-                textAlign:
-                  'center',
+                textAlign: 'center',
                 color:
                   'var(--text-muted)',
-                padding:
-                  '20px',
+                padding: '20px',
               }}
             >
               در حال بارگذاری...
@@ -775,16 +740,13 @@ return (
           )}
 
           {!loadingComments &&
-            myComments.length ===
-              0 && (
+            myComments.length === 0 && (
               <div
                 style={{
-                  textAlign:
-                    'center',
+                  textAlign: 'center',
                   color:
                     'var(--text-muted)',
-                  padding:
-                    '30px 0',
+                  padding: '30px 0',
                 }}
               >
                 هنوز نظری ثبت نکردید
@@ -800,16 +762,11 @@ return (
                 <div className="comment-header">
                   <div
                     style={{
-                      width:
-                        '38px',
-                      height:
-                        '38px',
-                      borderRadius:
-                        '50%',
-                      overflow:
-                        'hidden',
-                      display:
-                        'flex',
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '50%',
+                      overflow: 'hidden',
+                      display: 'flex',
                       alignItems:
                         'center',
                       justifyContent:
@@ -829,8 +786,7 @@ return (
                           'پوستر'
                         }
                         style={{
-                          width:
-                            '38px',
+                          width: '38px',
                           height:
                             '38px',
                           objectFit:
@@ -857,8 +813,7 @@ return (
                     <div
                       className="comment-user"
                       style={{
-                        fontWeight:
-                          700,
+                        fontWeight: 700,
                         color:
                           'var(--text)',
                       }}
@@ -889,8 +844,7 @@ return (
                           'nowrap',
                       }}
                     >
-                      ⏳ در انتظار
-                      تایید
+                      ⏳ در انتظار تایید
                     </span>
                   )}
 
@@ -936,9 +890,7 @@ return (
         </>
       )}
 
-      {/* ===== تب تنظیمات ===== */}
-      {activeTab ===
-        'settings' && (
+      {activeTab === 'settings' && (
         <form>
           <div className="form-group">
             <label className="form-label">
@@ -964,8 +916,7 @@ return (
               type="email"
               className="form-input"
               defaultValue={
-                userData?.email ||
-                ''
+                userData?.email || ''
               }
             />
           </div>
@@ -996,7 +947,6 @@ return (
   <Footer />
   <BackToTop />
 </>
-```
 
 );
 }

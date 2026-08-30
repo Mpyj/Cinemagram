@@ -1,27 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import BackToTop from '@/components/ui/BackToTop';
 import ContentGrid from '@/components/home/ContentGrid';
+
 import { Content, Genre } from '@/lib/types';
 import { getContent, getGenres } from '@/lib/api';
 
-export default function SearchPage() {
+function SearchContent() {
 const router = useRouter();
 const searchParams = useSearchParams();
+
 const initialQuery = searchParams.get('q') || '';
 
-const [query, setQuery] = useState(initialQuery);
+const [query, setQuery] = useState('');
 const [results, setResults] = useState<Content[]>([]);
 const [genres, setGenres] = useState<Genre[]>([]);
 const [loading, setLoading] = useState(false);
 const [error, setError] = useState('');
 const [searched, setSearched] = useState(false);
 
-// فیلترها
 const [selectedType, setSelectedType] = useState('');
 const [selectedGenre, setSelectedGenre] = useState('');
 const [selectedYear, setSelectedYear] = useState('');
@@ -30,17 +32,7 @@ const [sortBy, setSortBy] = useState('created_at');
 const [showFilters, setShowFilters] = useState(false);
 
 useEffect(() => {
-fetchGenres();
-
-```
-if (initialQuery) {
-  handleSearch(initialQuery);
-}
-```
-
-}, []);
-
-const fetchGenres = async () => {
+const loadGenres = async () => {
 try {
 const data = await getGenres();
 setGenres(data);
@@ -49,10 +41,22 @@ console.error('Error fetching genres:', err);
 }
 };
 
-const handleSearch = async (searchTerm?: string) => {
-const term = (searchTerm || query).trim();
+loadGenres();
 
-```
+}, []);
+
+useEffect(() => {
+setQuery(initialQuery);
+
+if (initialQuery) {
+  handleSearch(initialQuery);
+}
+
+}, [initialQuery]);
+
+const handleSearch = async (searchTerm?: string) => {
+const term = (searchTerm ?? query).trim();
+
 setLoading(true);
 setError('');
 setSearched(true);
@@ -86,8 +90,6 @@ try {
 
   const data = await getContent(params);
 
-  // getContent یک PaginatedContent برمی‌گرداند
-  // آرایه اصلی محتوا داخل items قرار دارد
   setResults(data.items);
 } catch (err) {
   console.error('Search error:', err);
@@ -96,7 +98,6 @@ try {
 } finally {
   setLoading(false);
 }
-```
 
 };
 
@@ -109,6 +110,7 @@ setSortBy('created_at');
 setQuery('');
 setResults([]);
 setSearched(false);
+setError('');
 };
 
 const handleCardClick = (content: Content) => {
@@ -120,10 +122,11 @@ return (
 
 ```
   <main>
-    <div className="hero-bg"></div>
+    <div className="hero-bg" />
 
     <div className="page-header">
       <h1 className="page-title">جستجو در سینماگرام</h1>
+
       <p className="page-subtitle">
         فیلم، سریال یا انیمه مورد علاقه‌ات رو پیدا کن
       </p>
@@ -137,7 +140,6 @@ return (
         paddingTop: '10px',
       }}
     >
-      {/* باکس جستجو */}
       <div
         className="search-box"
         style={{
@@ -154,9 +156,11 @@ return (
           placeholder="جستجو فیلم، سریال، انیمه..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) =>
-            e.key === 'Enter' && handleSearch()
-          }
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleSearch();
+            }
+          }}
           style={{
             flex: 1,
             fontSize: '0.95rem',
@@ -176,7 +180,6 @@ return (
         </button>
       </div>
 
-      {/* دکمه فیلترها */}
       <button
         type="button"
         onClick={() => setShowFilters(!showFilters)}
@@ -187,12 +190,9 @@ return (
           marginBottom: '15px',
         }}
       >
-        {showFilters
-          ? '✕ بستن فیلترها'
-          : '⚙️ فیلترها'}
+        {showFilters ? '✕ بستن فیلترها' : '⚙️ فیلترها'}
       </button>
 
-      {/* فیلترها */}
       {showFilters && (
         <div
           style={{
@@ -206,7 +206,6 @@ return (
             gap: '10px',
           }}
         >
-          {/* نوع محتوا */}
           <div>
             <label
               style={{
@@ -222,9 +221,7 @@ return (
 
             <select
               value={selectedType}
-              onChange={(e) =>
-                setSelectedType(e.target.value)
-              }
+              onChange={(e) => setSelectedType(e.target.value)}
               className="form-input"
             >
               <option value="">همه</option>
@@ -234,7 +231,6 @@ return (
             </select>
           </div>
 
-          {/* ژانر */}
           <div>
             <label
               style={{
@@ -250,9 +246,7 @@ return (
 
             <select
               value={selectedGenre}
-              onChange={(e) =>
-                setSelectedGenre(e.target.value)
-              }
+              onChange={(e) => setSelectedGenre(e.target.value)}
               className="form-input"
             >
               <option value="">همه ژانرها</option>
@@ -268,7 +262,6 @@ return (
             </select>
           </div>
 
-          {/* سال */}
           <div>
             <label
               style={{
@@ -285,7 +278,7 @@ return (
             <input
               type="text"
               inputMode="numeric"
-              placeholder="مثلا: 1403"
+              placeholder="مثلا: 2024"
               value={selectedYear}
               onChange={(e) =>
                 setSelectedYear(
@@ -296,7 +289,6 @@ return (
             />
           </div>
 
-          {/* حداقل امتیاز */}
           <div>
             <label
               style={{
@@ -324,12 +316,7 @@ return (
             />
           </div>
 
-          {/* مرتب‌سازی */}
-          <div
-            style={{
-              gridColumn: '1 / -1',
-            }}
-          >
+          <div style={{ gridColumn: '1 / -1' }}>
             <label
               style={{
                 fontSize: '0.75rem',
@@ -344,27 +331,16 @@ return (
 
             <select
               value={sortBy}
-              onChange={(e) =>
-                setSortBy(e.target.value)
-              }
+              onChange={(e) => setSortBy(e.target.value)}
               className="form-input"
             >
-              <option value="created_at">
-                جدیدترین
-              </option>
-              <option value="rating">
-                بیشترین امتیاز
-              </option>
-              <option value="views_count">
-                بیشترین بازدید
-              </option>
-              <option value="release_year">
-                سال ساخت
-              </option>
+              <option value="created_at">جدیدترین</option>
+              <option value="rating">بیشترین امتیاز</option>
+              <option value="views_count">بیشترین بازدید</option>
+              <option value="release_year">سال ساخت</option>
             </select>
           </div>
 
-          {/* دکمه‌ها */}
           <div
             style={{
               gridColumn: '1 / -1',
@@ -401,7 +377,6 @@ return (
       )}
     </div>
 
-    {/* نتایج */}
     {loading && (
       <div
         style={{
@@ -454,7 +429,24 @@ return (
   <Footer />
   <BackToTop />
 </>
-```
 
+);
+}
+
+export default function SearchPage() {
+return (
+<Suspense
+fallback={
+<div
+style={{
+minHeight: '100vh',
+display: 'flex',
+alignItems: 'center',
+justifyContent: 'center',
+}}
+>
+در حال بارگذاری... </div>
+}
+> <SearchContent /> </Suspense>
 );
 }
