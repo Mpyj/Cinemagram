@@ -4,7 +4,7 @@ from app.models import User, UserRole
 def fix_roles():
     db = SessionLocal()
     
-    owner_email = "mohammad.sahar1388@gmail.com"
+    owner_email = "ownermail@gmail.com"
     
     # همه کاربران رو user کن
     all_users = db.query(User).all()

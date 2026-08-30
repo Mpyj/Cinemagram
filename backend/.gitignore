@@ -22,6 +22,3 @@ uploads/
 # OS
 .DS_Store
 Thumbs.db
-# Scripts
-make_owner.py
-create_user.py
