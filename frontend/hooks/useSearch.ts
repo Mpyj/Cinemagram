@@ -10,16 +10,23 @@ export function useSearch(query: string) {
 
   useEffect(() => {
     if (!query || query.length < 2) {
+      setResults([]);
+      setLoading(false);
       return;
     }
 
     const delayDebounce = setTimeout(async () => {
       try {
         setLoading(true);
-        const data = await getContent({ search: query });
-        setResults(data);
+
+        const data = await getContent({
+          search: query,
+        });
+
+        setResults(data.items);
       } catch (err) {
         console.error(err);
+        setResults([]);
       } finally {
         setLoading(false);
       }

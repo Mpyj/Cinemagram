@@ -13,12 +13,19 @@ export function useContent(category?: string) {
     const fetchContent = async () => {
       try {
         setLoading(true);
-        const params = category && category !== 'all' ? { type: category } : {};
+
+        const params =
+          category && category !== 'all'
+            ? { type: category }
+            : {};
+
         const data = await getContent(params);
-        setContents(data);
+
+        setContents(data.items);
         setError(null);
       } catch (err) {
         setError('خطا در دریافت داده‌ها');
+        setContents([]);
         console.error(err);
       } finally {
         setLoading(false);

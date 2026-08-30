@@ -9,11 +9,12 @@ export default function Particles() {
     const container = containerRef.current;
     if (!container) return;
 
-    const particles = [];
+    const particles: HTMLDivElement[] = [];
     const count = window.innerWidth < 768 ? 10 : 20;
 
     for (let i = 0; i < count; i++) {
       const particle = document.createElement('div');
+
       particle.style.cssText = `
         position: absolute;
         width: ${Math.random() * 3 + 1}px;
@@ -25,12 +26,13 @@ export default function Particles() {
         animation: floatUp ${Math.random() * 10 + 10}s linear infinite;
         animation-delay: ${Math.random() * 10}s;
       `;
+
       container.appendChild(particle);
       particles.push(particle);
     }
 
     return () => {
-      particles.forEach(p => p.remove());
+      particles.forEach((particle) => particle.remove());
     };
   }, []);
 
@@ -38,13 +40,32 @@ export default function Particles() {
     <>
       <style jsx>{`
         @keyframes floatUp {
-          0% { bottom: -10px; opacity: 0; transform: translateX(0); }
-          10% { opacity: 1; }
-          90% { opacity: 0.8; }
-          100% { bottom: 100vh; opacity: 0; transform: translateX(50px); }
+          0% {
+            bottom: -10px;
+            opacity: 0;
+            transform: translateX(0);
+          }
+
+          10% {
+            opacity: 1;
+          }
+
+          90% {
+            opacity: 0.8;
+          }
+
+          100% {
+            bottom: 100vh;
+            opacity: 0;
+            transform: translateX(50px);
+          }
         }
       `}</style>
-      <div ref={containerRef} className="fixed inset-0 pointer-events-none z-0 overflow-hidden" />
+
+      <div
+        ref={containerRef}
+        className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+      />
     </>
   );
 }
