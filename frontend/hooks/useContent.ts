@@ -13,6 +13,7 @@ export function useContent(category?: string) {
     const fetchContent = async () => {
       try {
         setLoading(true);
+        setError(null);
 
         const params =
           category && category !== 'all'
@@ -21,12 +22,22 @@ export function useContent(category?: string) {
 
         const data = await getContent(params);
 
-        setContents(data.items);
-        setError(null);
-      } catch (err) {
+        console.log('CONTENT DATA:', data);
+
+        if (data && Array.isArray(data.items)) {
+          setContents(data.items);
+        } else {
+          console.error('Invalid content response format:', data);
+          setContents([]);
+          setError('فرمت اطلاعات دریافتی صحیح نیست');
+        }
+      } catch (err: any) {
+        console.error('CONTENT ERROR:', err);
+        console.error('ERROR RESPONSE:', err?.response);
+        console.error('ERROR MESSAGE:', err?.message);
+
         setError('خطا در دریافت داده‌ها');
         setContents([]);
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -35,5 +46,9 @@ export function useContent(category?: string) {
     fetchContent();
   }, [category]);
 
-  return { contents, loading, error };
+  return {
+    contents,
+    loading,
+    error,
+  };
 }

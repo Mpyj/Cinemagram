@@ -44,7 +44,7 @@ export interface PaginatedContent {
 
 // ===== Content APIs =====
 export const getContent = async (params?: Record<string, string | number | undefined>) => {
-  const response = await api.get('/content', { params });
+  const response = await api.get('/content/', { params });
   return response.data as PaginatedContent;
 };
 
