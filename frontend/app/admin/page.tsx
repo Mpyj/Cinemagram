@@ -16,6 +16,8 @@ export default function AdminPage() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [contents, setContents] = useState<Content[]>([]);
+  // لیست کامل سریال‌ها و انیمه‌ها فقط برای مدیریت اپیزودها
+  const [episodeContents, setEpisodeContents] = useState<Content[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [genres, setGenres] = useState<Genre[]>([]);
@@ -78,6 +80,7 @@ export default function AdminPage() {
           fetchAllData();
           fetchGenres();
           fetchEpisodes();
+          fetchEpisodeContents();
         } else {
           router.push('/');
         }
@@ -149,6 +152,35 @@ export default function AdminPage() {
       setEpisodes(response.data);
     } catch (err) {
       console.error('Error fetching episodes:', err);
+    }
+  };
+
+  const fetchEpisodeContents = async () => {
+    try {
+      // این درخواست مستقل از pagination صفحه محتواست تا همه سریال‌ها و انیمه‌ها
+      // برای انتخاب هنگام افزودن اپیزود در دسترس باشند.
+      const response = await api.get('/content', {
+        params: {
+          skip: 0,
+          limit: 1000,
+        },
+      });
+
+      const data = response.data;
+      const allContents: Content[] = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.items)
+          ? data.items
+          : [];
+
+      setEpisodeContents(
+        allContents.filter(
+          (content) => content.type === 'series' || content.type === 'anime'
+        )
+      );
+    } catch (err) {
+      console.error('Error fetching episode contents:', err);
+      setEpisodeContents([]);
     }
   };
 
@@ -703,8 +735,10 @@ export default function AdminPage() {
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '5px' }}>محتوا:</label>
                   <select value={episodeContentId} onChange={(e) => setEpisodeContentId(parseInt(e.target.value))} className="form-input">
                     <option value={0}>انتخاب کنید...</option>
-                    {contents.filter(c => c.type === 'series' || c.type === 'anime').map((content) => (
-                      <option key={content.id} value={content.id}>{content.type === 'series' ? '📺' : '✨'} {content.title}</option>
+                    {episodeContents.map((content) => (
+                      <option key={content.id} value={content.id}>
+                        {content.type === 'series' ? '📺' : '✨'} {content.title}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -729,7 +763,7 @@ export default function AdminPage() {
               )}
               
               {episodes.map((episode) => {
-                const parentContent = contents.find(c => c.id === episode.content_id);
+                const parentContent = episodeContents.find(c => c.id === episode.content_id);
                 return (
                   <div key={episode.id} className="admin-item">
                     <span style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gradient-1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: 'white', flexShrink: 0 }}>
